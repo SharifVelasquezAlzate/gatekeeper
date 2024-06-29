@@ -11,7 +11,7 @@ export abstract class Provider<Handler extends BaseHandler = BaseHandler> {
 		this.handler = handler;
 	}
 
-	public abstract process(req: Request, res: Response): Express.User;
+	public abstract process(req: Request, res: Response): Express.User | Promise<Express.User>;
 }
 
 export default Provider;

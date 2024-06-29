@@ -7,3 +7,5 @@ declare global {
 		type User = GatekeeperUser | undefined;
 	}
 }
+
+export {};

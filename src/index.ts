@@ -1,5 +1,6 @@
 import SessionManager from "./SessionManager";
 import Gatekeeper, { UserSerializer, UserDeserializer } from "./gatekeeper";
+import LocalProviderPriv from "./providers/LocalProvider";
 
 interface Options<SerializedUser> {
 	userSerializer: UserSerializer<SerializedUser>,
@@ -12,3 +13,5 @@ export default function getGatekeeper<SerializedUser>(options: Options<Serialize
 
 	return gatekeeper;
 }
+
+export const LocalProvider = LocalProviderPriv;

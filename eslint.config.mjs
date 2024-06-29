@@ -71,7 +71,6 @@ export default [
 		rules: {
 			'@typescript-eslint/no-unnecessary-condition': ['off'],
 			'@typescript-eslint/no-dynamic-delete': ['off'],
-			'@typescript-eslint/await-thenable': 'off',
 			'@typescript-eslint/no-empty-interface': 'off',
 			'@typescript-eslint/no-empty-function': 'off',
 			'@typescript-eslint/no-extraneous-class': ['error', {
