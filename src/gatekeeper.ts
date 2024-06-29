@@ -53,7 +53,6 @@ class Gatekeeper<SerializedUser> {
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
-			// If user is undefined, it means it should not be serialized
 			if (user === undefined) {
 				req.user = undefined;
 				await this.sessionManager.deleteSerializedUser(req);

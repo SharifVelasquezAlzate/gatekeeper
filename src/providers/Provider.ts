@@ -20,7 +20,7 @@ export abstract class Provider<
 	 */
 	protected requestHandler: CustomRequestHandler;
 	/**
-	 * Handles custom errors returned by the requestHandler
+	 * Handles custom errors thrown by the requestHandler
 	 */
 	protected errorHandler?: CustomErrorHandler;
 
