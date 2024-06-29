@@ -69,17 +69,9 @@ export default [
 			}
 		},
 		rules: {
-			'@typescript-eslint/no-unnecessary-condition': ['off'],
-			'@typescript-eslint/no-dynamic-delete': ['off'],
 			'@typescript-eslint/no-empty-interface': 'off',
 			'@typescript-eslint/no-empty-function': 'off',
-			'@typescript-eslint/no-extraneous-class': ['error', {
-				allowStaticOnly: true
-			}],
-			'@typescript-eslint/no-misused-promises': ['error', {
-				checksVoidReturn: false
-			}],
-			'@typescript-eslint/no-confusing-void-expression': 'off',
+			'@typescript-eslint/no-unnecessary-condition': 'off'
 		}
 	}),
 	// Custom rules

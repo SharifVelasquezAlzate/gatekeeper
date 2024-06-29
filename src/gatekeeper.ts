@@ -48,19 +48,25 @@ class Gatekeeper<SerializedUser> {
 
 			if (storedSerializedUser != null) {
 				this.populateRequestWithUserFromSerializedUser(req);
-				return next();
+				next();
+				return;
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
-			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer);
+			if (user === undefined) {
+				req.user = undefined;
+				await this.sessionManager.deleteSerializedUser(req);
+				return;
+			}
 			req.user = user;
-			return next();
+			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer);
+			next();
 		}).bind(this);
 	}
 
 	private populateRequestWithUserFromSerializedUser(req: Request) {
 		const storedSerializedUser = req.session.gatekeeper?.serializedUser as SerializedUser;
-		if (storedSerializedUser == null) {
+		if (storedSerializedUser === null || storedSerializedUser === undefined) {
 			req.user = undefined;
 			return;
 		}
