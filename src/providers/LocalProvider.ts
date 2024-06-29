@@ -65,6 +65,7 @@ class LocalProvider extends Provider<RequestHandler, ErrorHandler> {
 			return next(error);
 		}
 
+
 		const processedUser = requestHandlerResult;
 		return processedUser;
 	}
