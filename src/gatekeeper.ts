@@ -4,8 +4,8 @@ import mutatedReq from './request';
 
 import type { Request, Response, NextFunction } from 'express';
 
-type UserSerializer<SerializedUser> = (user: Express.User) => SerializedUser;
-type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => Express.User;
+export type UserSerializer<SerializedUser> = (user: Express.User) => SerializedUser;
+export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => Express.User;
 
 class Gatekeeper<SerializedUser> {
 	private sessionManager: SessionManager;

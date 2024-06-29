@@ -1,4 +1,4 @@
-import { GatekeeperSessionData } from "../../gatekeeper";
+import { GatekeeperSessionData } from "../..";
 
 declare module 'express-session' {
 	interface SessionData {

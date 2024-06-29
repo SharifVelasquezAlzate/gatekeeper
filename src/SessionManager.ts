@@ -27,7 +27,7 @@ class SessionManager<SerializedUser = unknown> {
 		// Promisified req.session.save
 		await new Promise((resolve, reject) => {
 			req.session.save((err) => {
-				if (err) reject(new Error('There was an error while trying to save the session'));
+				if (err) return reject(new Error('There was an error while trying to save the session'));
 				resolve(undefined);
 			});
 		});
