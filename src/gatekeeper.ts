@@ -47,7 +47,8 @@ class Gatekeeper<SerializedUser> {
 			const storedSerializedUser = req.session.gatekeeper?.serializedUser;
 
 			if (storedSerializedUser != null) {
-				return this.populateRequestWithUserFromSerializedUser(req);
+				this.populateRequestWithUserFromSerializedUser(req);
+				return next();
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
