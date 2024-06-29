@@ -50,7 +50,7 @@ class Gatekeeper<SerializedUser> {
 				return this.populateRequestWithUserFromSerializedUser(req);
 			}
 
-			const user = await this.providers[providerName].process(req, res);
+			const user = await this.providers[providerName].process(req, res, next);
 			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer);
 			req.user = user;
 			return next();
