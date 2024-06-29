@@ -8,12 +8,17 @@ class SessionManager<SerializedUser = unknown> {
 		user: Express.User,
 		userSerializer: UserSerializer<SerializedUser>
 	) {
-		if (!req.session) throw new Error('Login requires session support. Did you initialize express-session?');
+		if (req.session === undefined) {
+			throw new Error('Login requires session support. Did you initialize express-session?');
+		}
 
 		// Promisified req.session.regenerate
 		await new Promise((resolve, reject) => {
-			req.session.regenerate((err: Error) => {
-				if (err) return reject(err);
+			req.session.regenerate((err: Error | undefined) => {
+				if (err) {
+					reject(err);
+					return;
+				}
 				resolve(undefined);
 			});
 		});
@@ -27,7 +32,10 @@ class SessionManager<SerializedUser = unknown> {
 		// Promisified req.session.save
 		await new Promise((resolve, reject) => {
 			req.session.save((err) => {
-				if (err) return reject(new Error('There was an error while trying to save the session'));
+				if (err) {
+					reject(new Error('There was an error while trying to save the session'));
+					return;
+				}
 				resolve(undefined);
 			});
 		});

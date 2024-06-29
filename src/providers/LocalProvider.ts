@@ -5,7 +5,7 @@ import type { Request, Response, NextFunction } from 'express';
 type RequestHandler = (
 	username: unknown,
 	password: unknown
-) => Express.User | Promise<Express.User> | Error;
+) => NonNullable<Express.User | Promise<Express.User>>;
 
 export class IncorrectCredentials extends Error {
 	constructor(message: string) {
@@ -47,27 +47,26 @@ class LocalProvider extends Provider<RequestHandler, ErrorHandler> {
 	public async process(req: Request, res: Response, next: NextFunction) {
 		const { username, password } = req.body as Record<string, unknown>;
 
-		const requestHandlerResult = await this.requestHandler(username, password);
-
-		if (requestHandlerResult instanceof Error) {
-			const error = requestHandlerResult;
-
+		try {
+			const requestHandlerResult = await this.requestHandler(username, password);
+			const processedUser = requestHandlerResult;
+			return processedUser;
+		} catch (error) {
 			// In case there's no error handler defined, pass it on to Express
 			if (typeof this.errorHandler !== 'function') {
-				return next(error);
+				next(error);
+				return undefined;
 			}
 
 			if (error instanceof IncorrectCredentials) {
 				this.errorHandler(req, res, error);
+				return undefined;
 			}
 
 			// If not a LocalProvider custom error, pass it on to Express to handle
-			return next(error);
+			next(error);
+			return undefined;
 		}
-
-
-		const processedUser = requestHandlerResult;
-		return processedUser;
 	}
 }
 

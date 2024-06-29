@@ -11,24 +11,30 @@ export interface Request {
 	_sessionManager: SessionManager;
 
 	logout: () => (void | Promise<void>);
-	isAuthenticated: () => void;
-	isUnauthenticated: () => void;
+	isAuthenticated: () => boolean;
+	isUnauthenticated: () => boolean;
 }
 
 const req: Request = {
 	user: {},
 	_sessionManager: new SessionManager(),
 
-	logout: () => {},
-	isAuthenticated: () => {},
-	isUnauthenticated: () => {}
-};
+	/*
+	* Logs out user.
+	*
+	* REQUIRES: req._sessionManager to be defined
+	*/
+	logout: async function(this: ExpressRequest & { _sessionManager: SessionManager }) {
+		await this._sessionManager.deleteSerializedUser(this);
+	},
 
-/*
-* Logs out user. NEEDS FOR req._sessionManager TO BE DEFINED
-*/
-req.logout = async function(this: ExpressRequest & { _sessionManager: SessionManager }) {
-	await this._sessionManager.deleteSerializedUser(this);
+	isAuthenticated: function(this: ExpressRequest) {
+		return this.user !== undefined && this.user !== null;
+	},
+
+	isUnauthenticated: function(this: ExpressRequest) {
+		return this.isAuthenticated();
+	}
 };
 
 export default req;
