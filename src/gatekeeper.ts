@@ -7,25 +7,31 @@ import type { Request, Response, NextFunction } from 'express';
 export type UserSerializer<SerializedUser> = (user: Express.User) => SerializedUser;
 export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => Express.User;
 
+interface InitializeConfig<SerializedUser> {
+	userSerializer: UserSerializer<SerializedUser>,
+	userDeserializer: UserDeserializer<SerializedUser>
+}
+
+const notInitializedError = new Error(
+	'Gatekeeper has not been initialized. Remember to call gatekeeper.initialize() as an express middleware'
+);
+
 class Gatekeeper<SerializedUser> {
 	private sessionManager: SessionManager;
-	private userSerializer: UserSerializer<SerializedUser>;
-	private userDeserializer: UserDeserializer<SerializedUser>;
+	private userSerializer?: UserSerializer<SerializedUser>;
+	private userDeserializer?: UserDeserializer<SerializedUser>;
 
 	private providers: Record<string, Provider> = {};
 
-	constructor(
-		sessionManager: SessionManager,
-		userSerializer: UserSerializer<SerializedUser>,
-		userDeserializer: UserDeserializer<SerializedUser>
-	) {
+	constructor(sessionManager: SessionManager) {
 		this.sessionManager = sessionManager;
-		this.userSerializer = userSerializer;
-		this.userDeserializer = userDeserializer;
 	}
 
-	public initialize() {		
-		return (function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+	public initialize(config: InitializeConfig<SerializedUser>) {
+		this.userSerializer = config.userSerializer;
+		this.userDeserializer = config.userDeserializer;
+
+		return function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
 			req._sessionManager = this.sessionManager;
 
 			req.logout = req.logout || mutatedReq.logout.bind(req);
@@ -35,7 +41,7 @@ class Gatekeeper<SerializedUser> {
 			this.populateRequestWithUserFromSerializedUser(req);
 
 			next();
-		}).bind(this);
+		}.bind(this);
 	}
 
 	public registerProvider(name: string, provider: Provider) {
@@ -43,7 +49,9 @@ class Gatekeeper<SerializedUser> {
 	}
 
 	public authenticateWithProviderName(providerName: string) {
-		return (async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+		this.ensureInitialized();
+
+		return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
 			const storedSerializedUser = req.session.gatekeeper?.serializedUser;
 
 			if (storedSerializedUser != null) {
@@ -59,20 +67,32 @@ class Gatekeeper<SerializedUser> {
 				return;
 			}
 			req.user = user;
-			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer);
+			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer!);
 			next();
-		}).bind(this);
+		}.bind(this);
 	}
 
 	private populateRequestWithUserFromSerializedUser(req: Request) {
+		this.ensureInitialized();
+
 		const storedSerializedUser = req.session.gatekeeper?.serializedUser as SerializedUser;
 		if (storedSerializedUser === null || storedSerializedUser === undefined) {
 			req.user = undefined;
 			return;
 		}
 
-		const user = this.userDeserializer(storedSerializedUser);
+		const user = this.userDeserializer!(storedSerializedUser);
 		req.user = user;
+	}
+
+	//
+	private ensureInitialized(this: Gatekeeper<SerializedUser>) {
+		if (typeof this.userSerializer !== 'function') {
+			throw notInitializedError;
+		}
+		if (typeof this.userDeserializer !== 'function') {
+			throw notInitializedError;
+		}
 	}
 }
 
