@@ -29,7 +29,7 @@ export class CodeMissing extends Error {
 
 type Handler = (profile: GoogleProfile) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
-class OAuth2Provider extends Provider<Handler> {
+class GoogleProvider extends Provider<Handler> {
 	private clientId: string;
 	private clientSecret: string;
 	private callbackURL: string;
@@ -111,4 +111,4 @@ class OAuth2Provider extends Provider<Handler> {
 	}
 }
 
-export default OAuth2Provider;
+export default GoogleProvider;
