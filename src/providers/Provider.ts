@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RequestHandler<Params extends unknown[] = any[]> = (
+export type Handler<Params extends unknown[] = any[]> = (
 	...args: Params
 ) => NonNullable<Express.User | Promise<Express.User>>;
 
@@ -12,20 +12,20 @@ export type RequestHandler<Params extends unknown[] = any[]> = (
 export type ErrorHandler<PotentialErrors> = (req: Request, res: Response, error: PotentialErrors) => void;
 
 export abstract class Provider<
-	CustomRequestHandler extends RequestHandler = RequestHandler,
+	CustomHandler extends Handler = Handler,
 	CustomErrorHandler extends ErrorHandler<never> = ErrorHandler<never>
 > {
 	/**
 	 * Middleware that processes the request and returns a `Promise<Express.User> | Express.User` or an `Error` object
 	 */
-	protected requestHandler: CustomRequestHandler;
+	protected handler: CustomHandler;
 	/**
-	 * Handles custom errors thrown by the requestHandler
+	 * Handles custom errors thrown by the handler
 	 */
 	protected errorHandler?: CustomErrorHandler;
 
-	constructor(requestHandler: CustomRequestHandler, errorHandler?: CustomErrorHandler | null) {
-		this.requestHandler = requestHandler;
+	constructor(handler: CustomHandler, errorHandler?: CustomErrorHandler | null) {
+		this.handler = handler;
 		if (errorHandler !== null) this.errorHandler = errorHandler;
 	}
 
