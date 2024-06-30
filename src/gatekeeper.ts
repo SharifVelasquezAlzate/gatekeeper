@@ -62,11 +62,6 @@ class Gatekeeper<SerializedUser> {
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
-			await new Promise((resolve) => {
-				setTimeout(() => {
-					resolve(undefined);
-				}, 3000);
-			});
 			if (user === undefined) {
 				await this.sessionManager.setUser(req, undefined);
 				await this.sessionManager.deleteSerializedUser(req);

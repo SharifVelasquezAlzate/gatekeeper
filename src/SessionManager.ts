@@ -3,22 +3,42 @@ import type { SessionData } from 'express-session';
 
 type UserSerializer<SerializedUser> = (user: SessionData['user']) => SerializedUser;
 
+async function regenerateSession(req: Request) {
+	const previousSession = req.session;
+
+	await new Promise((resolve, reject) => {
+		req.session.regenerate((err: Error | undefined) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+
+			// We keep the information present in the previous session
+			Object.assign(req.session, {...previousSession, ...req.session});
+			resolve(undefined);
+		});
+	});
+}
+
+async function saveSession(req: Request) {
+	await new Promise((resolve, reject) => {
+		req.session.save((err) => {
+			if (err) {
+				reject(new Error('There was an error while trying to save the session'));
+				return;
+			}
+			resolve(undefined);
+		});
+	});
+}
+
 class SessionManager<SerializedUser = unknown> {
 	public async setUser(req: Request, user: SessionData['user'] | undefined) {
 		this.ensureRequirements(req);
 
 		req.session.user = user;
 
-		// Promisified req.session.save
-		await new Promise((resolve, reject) => {
-			req.session.save((err) => {
-				if (err) {
-					reject(new Error('There was an error while trying to save the session'));
-					return;
-				}
-				resolve(undefined);
-			});
-		});
+		await saveSession(req);		
 	}
 
 	public async serializeAndSaveUser(
@@ -28,21 +48,7 @@ class SessionManager<SerializedUser = unknown> {
 	) {
 		this.ensureRequirements(req);
 
-		const previousSession = req.session;
-
-		// Promisified req.session.regenerate
-		await new Promise((resolve, reject) => {
-			req.session.regenerate((err: Error | undefined) => {
-				if (err) {
-					reject(err);
-					return;
-				}
-
-				// We keep the information present in the previous session
-				Object.assign(req.session, {...previousSession, ...req.session});
-				resolve(undefined);
-			});
-		});
+		await regenerateSession(req);
 
 		if (!req.session.gatekeeper) {
 			req.session.gatekeeper = {};
@@ -51,15 +57,7 @@ class SessionManager<SerializedUser = unknown> {
 		req.session.gatekeeper.serializedUser = userSerializer(user);
 
 		// Promisified req.session.save
-		await new Promise((resolve, reject) => {
-			req.session.save((err) => {
-				if (err) {
-					reject(new Error('There was an error while trying to save the session'));
-					return;
-				}
-				resolve(undefined);
-			});
-		});
+		await saveSession(req);
 	}
 
 	public async deleteSerializedUser(req: Request) {
@@ -70,12 +68,7 @@ class SessionManager<SerializedUser = unknown> {
 		}
 
 		// Promisified req.session.save
-		await new Promise((resolve, reject) => {
-			req.session.save((err: Error) => {
-				if (err) reject(err);
-				resolve(undefined);
-			});
-		});
+		await saveSession(req);
 	}
 
 	private ensureRequirements(req: Request) {
