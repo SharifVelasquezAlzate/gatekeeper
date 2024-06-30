@@ -2,7 +2,7 @@ import Provider, { ErrorHandler as BaseErrorHandler } from './Provider';
 
 import type { Request, Response, NextFunction } from 'express';
 
-type RequestHandler = (
+type Handler = (
 	username: unknown,
 	password: unknown
 ) => NonNullable<Express.User | Promise<Express.User>>;
@@ -29,8 +29,8 @@ function createErrorHandlerFromOptions(options: Options): ErrorHandler | null {
 	};
 }
 
-class LocalProvider extends Provider<RequestHandler, ErrorHandler> {
-	constructor(requestHandler: RequestHandler, errorHandlerOrOptions?: ErrorHandler | Options) {
+class LocalProvider extends Provider<Handler, ErrorHandler> {
+	constructor(handler: Handler, errorHandlerOrOptions?: ErrorHandler | Options) {
 		let errorHandler;
 		let options;
 
@@ -41,15 +41,15 @@ class LocalProvider extends Provider<RequestHandler, ErrorHandler> {
 			errorHandler = createErrorHandlerFromOptions(options);
 		}
 
-		super(requestHandler, errorHandler);
+		super(handler, errorHandler);
 	}
 
 	public async process(req: Request, res: Response, next: NextFunction) {
 		const { username, password } = req.body as Record<string, unknown>;
 
 		try {
-			const requestHandlerResult = await this.requestHandler(username, password);
-			const processedUser = requestHandlerResult;
+			const handlerResult = await this.handler(username, password);
+			const processedUser = handlerResult;
 			return processedUser;
 		} catch (error) {
 			// In case there's no error handler defined, pass it on to Express
