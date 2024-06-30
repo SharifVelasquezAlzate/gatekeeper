@@ -8,6 +8,7 @@ interface Config {
 	clientSecret: string;
 
 	callbackURL: string;
+	scope?: string[];
 }
 
 interface GoogleProfile {
@@ -28,6 +29,7 @@ class OAuth2Provider extends Provider<Handler, ErrorHandler> {
 	private clientId: string;
 	private clientSecret: string;
 	private callbackURL: string;
+	private scope: string[];
 	
 	private googleAuthURL: string;
 	private googleTokenURL: string;
@@ -38,10 +40,10 @@ class OAuth2Provider extends Provider<Handler, ErrorHandler> {
 
 		this.clientId = config.clientId;
 		this.clientSecret = config.clientSecret;
-
 		this.callbackURL = config.callbackURL;
+		this.scope = config.scope ?? ['profile'];
 
-		this.googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.clientId}&redirect_uri=${this.callbackURL}&response_type=code&scope=profile email`;
+		this.googleAuthURL = this.generateAuthURL(this.clientId, this.callbackURL, this.scope);
 		this.googleTokenURL = 'https://oauth2.googleapis.com/token';
 		this.googleProfileURL = 'https://www.googleapis.com/oauth2/v3/userinfo';
 	}
@@ -95,6 +97,14 @@ class OAuth2Provider extends Provider<Handler, ErrorHandler> {
 			next(error);
 			return undefined;
 		}
+	}
+
+	private generateAuthURL(clientId: string, callbackURL: string, scope: string[]) {
+		return 'https://accounts.google.com/o/oauth2/v2/auth?' +
+				'client_id=' + clientId +
+				'&redirect_uri=' + callbackURL +
+				'&response_type=code' +
+				'&scope=' + scope.join(' ');
 	}
 }
 
