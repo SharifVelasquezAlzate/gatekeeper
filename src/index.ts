@@ -1,5 +1,5 @@
-import SessionManager from "./SessionManager";
-import Gatekeeper from "./gatekeeper";
+import Gatekeeper from "./lib/Gatekeeper";
+import SessionManager from "./lib/SessionManager";
 
 const gatekeeper = new Gatekeeper(new SessionManager());
 export default gatekeeper;
