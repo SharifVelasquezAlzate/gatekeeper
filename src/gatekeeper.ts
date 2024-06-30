@@ -3,9 +3,10 @@ import Provider from './providers/Provider';
 import mutatedReq from './request';
 
 import type { Request, Response, NextFunction } from 'express';
+import type { SessionData } from 'express-session';
 
-export type UserSerializer<SerializedUser> = (user: Express.User) => SerializedUser;
-export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => Express.User;
+export type UserSerializer<SerializedUser> = (user: SessionData['user']) => SerializedUser;
+export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => SessionData['user'];
 
 interface InitializeConfig<SerializedUser> {
 	userSerializer: UserSerializer<SerializedUser>,
@@ -31,14 +32,14 @@ class Gatekeeper<SerializedUser> {
 		this.userSerializer = config.userSerializer;
 		this.userDeserializer = config.userDeserializer;
 
-		return function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+		return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
 			req._sessionManager = this.sessionManager;
 
 			req.logout = req.logout || mutatedReq.logout.bind(req);
 			req.isAuthenticated = req.isAuthenticated || mutatedReq.isAuthenticated.bind(req);
 			req.isUnauthenticated = req.isUnauthenticated || mutatedReq.isUnauthenticated.bind(req);
 
-			this.populateRequestWithUserFromSerializedUser(req);
+			await this.populateRequestWithUserFromSerializedUser(req);
 
 			next();
 		}.bind(this);
@@ -54,35 +55,40 @@ class Gatekeeper<SerializedUser> {
 		return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
 			const storedSerializedUser = req.session.gatekeeper?.serializedUser;
 
-			if (storedSerializedUser != null) {
-				this.populateRequestWithUserFromSerializedUser(req);
+			if (storedSerializedUser !== null && storedSerializedUser !== undefined) {
+				await this.populateRequestWithUserFromSerializedUser(req);
 				next();
 				return;
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
+			await new Promise((resolve) => {
+				setTimeout(() => {
+					resolve(undefined);
+				}, 3000);
+			});
 			if (user === undefined) {
-				req.user = undefined;
+				await this.sessionManager.setUser(req, undefined);
 				await this.sessionManager.deleteSerializedUser(req);
 				return;
 			}
-			req.user = user;
+			await this.sessionManager.setUser(req, user);
 			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer!);
 			next();
 		}.bind(this);
 	}
 
-	private populateRequestWithUserFromSerializedUser(req: Request) {
+	private async populateRequestWithUserFromSerializedUser(req: Request) {
 		this.ensureInitialized();
 
 		const storedSerializedUser = req.session.gatekeeper?.serializedUser as SerializedUser;
 		if (storedSerializedUser === null || storedSerializedUser === undefined) {
-			req.user = undefined;
+			await this.sessionManager.setUser(req, undefined);
 			return;
 		}
 
 		const user = this.userDeserializer!(storedSerializedUser);
-		req.user = user;
+		await this.sessionManager.setUser(req, user);
 	}
 
 	//

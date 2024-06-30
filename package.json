@@ -34,52 +34,6 @@
     "typescript": "^5.5.2",
     "typescript-eslint": "^7.14.1"
   },
-  "eslintConfig": {
-    "extends": "eslint:recommended",
-    "env": {
-      "es6": true,
-      "node": true,
-      "jest": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2023,
-      "sourceType": "module"
-    },
-    "rules": {
-      "no-console": "error",
-      "semi": "warn",
-      "indent": [
-        "error",
-        4
-      ],
-      "no-multiple-empty-lines": [
-        "error",
-        {
-          "max": 2,
-          "maxEOF": 1,
-          "maxBOF": 0
-        }
-      ],
-      "max-len": [
-        "error",
-        {
-          "code": 120,
-          "ignoreUrls": true,
-          "ignoreRegExpLiterals": true
-        }
-      ],
-      "camelcase": "error",
-      "id-match": [
-        "error",
-        "^(_|[a-z])[a-zA-Z]*$|^[A-Z]+[a-zA-Z]*(Model|Enum)$|DataTypes|SibApiV3Sdk|DateTime|AuthUser|Sequelize|^[A-Z_]*$",
-        {
-          "properties": true,
-          "ignoreDestructuring": true,
-          "classFields": true
-        }
-      ]
-    }
-  },
   "dependencies": {
     "axios": "^1.7.2",
     "jsonwebtoken": "^9.0.2",

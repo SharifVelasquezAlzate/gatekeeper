@@ -1,13 +1,14 @@
 import SessionManager from "./SessionManager";
 
 import type { Request as ExpressRequest } from "express";
+import type { SessionData } from "express-session";
 
 export interface User {
 	
 }
 
 export interface Request {
-	user: Express.User;
+	user: SessionData['user'];
 	_sessionManager: SessionManager;
 
 	logout: () => (void | Promise<void>);
@@ -29,7 +30,7 @@ const req: Request = {
 	},
 
 	isAuthenticated: function(this: ExpressRequest) {
-		return this.user !== undefined && this.user !== null;
+		return this.session.user !== undefined && this.session.user !== null;
 	},
 
 	isUnauthenticated: function(this: ExpressRequest) {
