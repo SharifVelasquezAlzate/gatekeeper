@@ -62,6 +62,7 @@ class Gatekeeper<SerializedUser> {
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
+			// We don't call next, as undefined means the Provider already did the error handling
 			if (user === undefined) {
 				await this.sessionManager.setUser(req, undefined);
 				await this.sessionManager.deleteSerializedUser(req);

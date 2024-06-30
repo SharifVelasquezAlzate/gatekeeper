@@ -52,8 +52,7 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
 	public async process(req: Request, res: Response, next: NextFunction) {
 		if (req.query?.code) {
-			await this.processCallback(req, res, next);
-			return;
+			return await this.processCallback(req, res, next);
 		} else {
 			this.processFirstContact(req, res);
 			return undefined;
@@ -78,29 +77,33 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 			}
 		}
 
-		res.redirect(this.authorizationURL);
+		res.redirect(authorizationURLWithParameters.toString());
 	}
 
 	public async processCallback(req: Request, res: Response, next: NextFunction) {
 		const { code } = req.query;
-
 		if (typeof code !== 'string') {
 			throw new Error('code for OAuth2 is undefined');
 		}
 
+		// Obtain access token
 		const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
 			code: code,
 			client_id: this.clientId,
 			client_secret: this.clientSecret,
 			redirect_uri: this.callbackURL,
 			grant_type: 'authorization_code'
+		}, {
+			headers: { Accept: 'application/json' }
 		});
-
 		const { access_token } = data;
 
 		// Use access token to fetch user profile
 		const { data: profile } = await axios.get<Profile>(this.profileURL, {
-			headers: { Authorization: `Bearer ${access_token}` }
+			headers: {
+				Authorization: `Bearer ${access_token}`,
+				Accept: 'application/json'
+			}
 		});
 
 		try {
@@ -111,7 +114,6 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 				next(error);
 				return undefined;
 			}
-
 			this.errorHandler(error, req, res, next);
 			return undefined;
 		}
