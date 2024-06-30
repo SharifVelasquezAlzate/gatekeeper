@@ -32,14 +32,14 @@ class Gatekeeper<SerializedUser> {
 		this.userSerializer = config.userSerializer;
 		this.userDeserializer = config.userDeserializer;
 
-		return function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+		return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
 			req._sessionManager = this.sessionManager;
 
 			req.logout = req.logout || mutatedReq.logout.bind(req);
 			req.isAuthenticated = req.isAuthenticated || mutatedReq.isAuthenticated.bind(req);
 			req.isUnauthenticated = req.isUnauthenticated || mutatedReq.isUnauthenticated.bind(req);
 
-			this.populateRequestWithUserFromSerializedUser(req);
+			await this.populateRequestWithUserFromSerializedUser(req);
 
 			next();
 		}.bind(this);
@@ -55,35 +55,40 @@ class Gatekeeper<SerializedUser> {
 		return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
 			const storedSerializedUser = req.session.gatekeeper?.serializedUser;
 
-			if (storedSerializedUser != null) {
-				this.populateRequestWithUserFromSerializedUser(req);
+			if (storedSerializedUser !== null && storedSerializedUser !== undefined) {
+				await this.populateRequestWithUserFromSerializedUser(req);
 				next();
 				return;
 			}
 
 			const user = await this.providers[providerName].process(req, res, next);
+			await new Promise((resolve) => {
+				setTimeout(() => {
+					resolve(undefined);
+				}, 3000);
+			});
 			if (user === undefined) {
-				this.sessionManager.setUser(req, undefined);
+				await this.sessionManager.setUser(req, undefined);
 				await this.sessionManager.deleteSerializedUser(req);
 				return;
 			}
-			this.sessionManager.setUser(req, user);
+			await this.sessionManager.setUser(req, user);
 			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer!);
 			next();
 		}.bind(this);
 	}
 
-	private populateRequestWithUserFromSerializedUser(req: Request) {
+	private async populateRequestWithUserFromSerializedUser(req: Request) {
 		this.ensureInitialized();
 
 		const storedSerializedUser = req.session.gatekeeper?.serializedUser as SerializedUser;
 		if (storedSerializedUser === null || storedSerializedUser === undefined) {
-			this.sessionManager.setUser(req, undefined);
+			await this.sessionManager.setUser(req, undefined);
 			return;
 		}
 
 		const user = this.userDeserializer!(storedSerializedUser);
-		this.sessionManager.setUser(req, user);
+		await this.sessionManager.setUser(req, user);
 	}
 
 	//

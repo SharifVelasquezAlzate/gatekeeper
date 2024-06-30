@@ -4,9 +4,21 @@ import type { SessionData } from 'express-session';
 type UserSerializer<SerializedUser> = (user: SessionData['user']) => SerializedUser;
 
 class SessionManager<SerializedUser = unknown> {
-	public setUser(req: Request, user: SessionData['user'] | undefined) {
+	public async setUser(req: Request, user: SessionData['user'] | undefined) {
 		this.ensureRequirements(req);
+
 		req.session.user = user;
+
+		// Promisified req.session.save
+		await new Promise((resolve, reject) => {
+			req.session.save((err) => {
+				if (err) {
+					reject(new Error('There was an error while trying to save the session'));
+					return;
+				}
+				resolve(undefined);
+			});
+		});
 	}
 
 	public async serializeAndSaveUser(
@@ -16,6 +28,8 @@ class SessionManager<SerializedUser = unknown> {
 	) {
 		this.ensureRequirements(req);
 
+		const previousSession = req.session;
+
 		// Promisified req.session.regenerate
 		await new Promise((resolve, reject) => {
 			req.session.regenerate((err: Error | undefined) => {
@@ -23,6 +37,9 @@ class SessionManager<SerializedUser = unknown> {
 					reject(err);
 					return;
 				}
+
+				// We keep the information present in the previous session
+				Object.assign(req.session, {...previousSession, ...req.session});
 				resolve(undefined);
 			});
 		});
@@ -52,6 +69,7 @@ class SessionManager<SerializedUser = unknown> {
 			delete req.session.gatekeeper.serializedUser;
 		}
 
+		// Promisified req.session.save
 		await new Promise((resolve, reject) => {
 			req.session.save((err: Error) => {
 				if (err) reject(err);
