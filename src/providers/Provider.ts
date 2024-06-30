@@ -20,7 +20,6 @@ export type ErrorHandler = (
 export abstract class Provider<CustomHandler extends Handler = Handler> {
 	/**
 	 * Middleware that processes the request and returns a `Promise<SessionData['user']> | SessionData['user']`
-	 * or an `Error` object
 	 */
 	protected handler: CustomHandler;
 	/**
