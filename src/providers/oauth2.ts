@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import Provider, { ErrorHandler } from '../lib/Provider';
+import Provider, { ErrorHandler } from '@/lib/Provider';
 
 import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';

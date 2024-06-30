@@ -1,5 +1,5 @@
-import { GatekeeperSessionData } from "../../lib/Gatekeeper";
-import { User as GatekeeperUser } from "../../lib/request";
+import { GatekeeperSessionData } from "@/lib/Gatekeeper";
+import { User as GatekeeperUser } from "@/lib/request";
 
 declare module 'express-session' {
 	interface SessionData {
@@ -7,5 +7,3 @@ declare module 'express-session' {
 		user: GatekeeperUser | undefined;
 	}
 }
-
-export {};

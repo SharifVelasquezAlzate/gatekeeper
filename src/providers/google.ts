@@ -1,4 +1,5 @@
-import  { ErrorHandler } from '../lib/Provider';
+import  { ErrorHandler } from '@/lib/Provider';
+
 import OAuth2Provider, { Handler } from './oauth2';
 
 
