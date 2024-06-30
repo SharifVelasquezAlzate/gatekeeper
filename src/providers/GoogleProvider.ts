@@ -1,14 +1,17 @@
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
 
-import Provider, { ErrorHandler as BaseErrorHandler } from './Provider';
+import Provider, { ErrorHandler } from './Provider';
 
 interface Config {
 	clientId: string;
 	clientSecret: string;
-
 	callbackURL: string;
 	scope?: string[];
+
+	googleAuthURL?: string;
+	googleTokenURL?: string;
+	googleProfileURL?: string;
 }
 
 interface GoogleProfile {
@@ -23,9 +26,8 @@ export class CodeMissing extends Error {
 }
 
 type Handler = (profile: GoogleProfile) => NonNullable<Express.User | Promise<Express.User>>;
-type ErrorHandler = BaseErrorHandler<CodeMissing>;
 
-class OAuth2Provider extends Provider<Handler, ErrorHandler> {
+class OAuth2Provider extends Provider<Handler> {
 	private clientId: string;
 	private clientSecret: string;
 	private callbackURL: string;
@@ -43,9 +45,9 @@ class OAuth2Provider extends Provider<Handler, ErrorHandler> {
 		this.callbackURL = config.callbackURL;
 		this.scope = config.scope ?? ['profile'];
 
-		this.googleAuthURL = this.generateAuthURL(this.clientId, this.callbackURL, this.scope);
-		this.googleTokenURL = 'https://oauth2.googleapis.com/token';
-		this.googleProfileURL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+		this.googleAuthURL = config.googleAuthURL ?? this.generateAuthURL(this.clientId, this.callbackURL, this.scope);
+		this.googleTokenURL = config.googleTokenURL ?? 'https://oauth2.googleapis.com/token';
+		this.googleProfileURL = config.googleProfileURL ?? 'https://www.googleapis.com/oauth2/v3/userinfo';
 	}
 
 	public async process(req: Request, res: Response, next: NextFunction) {
@@ -93,8 +95,7 @@ class OAuth2Provider extends Provider<Handler, ErrorHandler> {
 				return undefined;
 			}
 
-			// If not a GoogleProvider custom error, pass it on to Express to handle
-			next(error);
+			this.errorHandler(error, req, res, next);
 			return undefined;
 		}
 	}
