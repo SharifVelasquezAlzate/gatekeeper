@@ -1,16 +1,16 @@
 {
   "name": "@sharifvelasquez/gatekeeper",
   "version": "1.0.0",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npx eslint && tsc && tsc-alias"
+    "build": "npx eslint && tsc && node scripts/setupPackage.js && tsc-alias && cd dist && npm pack --pack-destination ../"
   },
   "keywords": [
+	"gatekeeper",
     "authentication",
     "auth",
-    "gatekeeper",
     "login",
     "signup"
   ],
