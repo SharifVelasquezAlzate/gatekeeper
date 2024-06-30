@@ -1,11 +1,12 @@
 import Provider, { ErrorHandler } from './Provider';
 
 import type { Request, Response, NextFunction } from 'express';
+import type { SessionData } from 'express-session';
 
 type Handler = (
 	username: unknown,
 	password: unknown
-) => NonNullable<Express.User | Promise<Express.User>>;
+) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
 export class IncorrectCredentials extends Error {
 	constructor(message: string) {

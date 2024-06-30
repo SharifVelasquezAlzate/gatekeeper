@@ -3,9 +3,10 @@ import Provider from './providers/Provider';
 import mutatedReq from './request';
 
 import type { Request, Response, NextFunction } from 'express';
+import type { SessionData } from 'express-session';
 
-export type UserSerializer<SerializedUser> = (user: Express.User) => SerializedUser;
-export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => Express.User;
+export type UserSerializer<SerializedUser> = (user: SessionData['user']) => SerializedUser;
+export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => SessionData['user'];
 
 interface InitializeConfig<SerializedUser> {
 	userSerializer: UserSerializer<SerializedUser>,
@@ -62,11 +63,11 @@ class Gatekeeper<SerializedUser> {
 
 			const user = await this.providers[providerName].process(req, res, next);
 			if (user === undefined) {
-				req.user = undefined;
+				this.sessionManager.setUser(req, undefined);
 				await this.sessionManager.deleteSerializedUser(req);
 				return;
 			}
-			req.user = user;
+			this.sessionManager.setUser(req, user);
 			await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer!);
 			next();
 		}.bind(this);
@@ -77,12 +78,12 @@ class Gatekeeper<SerializedUser> {
 
 		const storedSerializedUser = req.session.gatekeeper?.serializedUser as SerializedUser;
 		if (storedSerializedUser === null || storedSerializedUser === undefined) {
-			req.user = undefined;
+			this.sessionManager.setUser(req, undefined);
 			return;
 		}
 
 		const user = this.userDeserializer!(storedSerializedUser);
-		req.user = user;
+		this.sessionManager.setUser(req, user);
 	}
 
 	//

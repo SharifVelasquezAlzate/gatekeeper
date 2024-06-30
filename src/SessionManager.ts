@@ -1,16 +1,20 @@
 import type { Request } from 'express';
+import type { SessionData } from 'express-session';
 
-type UserSerializer<SerializedUser> = (user: Express.User) => SerializedUser;
+type UserSerializer<SerializedUser> = (user: SessionData['user']) => SerializedUser;
 
 class SessionManager<SerializedUser = unknown> {
+	public setUser(req: Request, user: SessionData['user'] | undefined) {
+		this.ensureRequirements(req);
+		req.session.user = user;
+	}
+
 	public async serializeAndSaveUser(
 		req: Request,
-		user: Express.User,
+		user: SessionData['user'],
 		userSerializer: UserSerializer<SerializedUser>
 	) {
-		if (req.session === undefined) {
-			throw new Error('Login requires session support. Did you initialize express-session?');
-		}
+		this.ensureRequirements(req);
 
 		// Promisified req.session.regenerate
 		await new Promise((resolve, reject) => {
@@ -42,7 +46,7 @@ class SessionManager<SerializedUser = unknown> {
 	}
 
 	public async deleteSerializedUser(req: Request) {
-		if (!req.session) throw new Error('Login requires session support. Did you initialize express-session?');
+		this.ensureRequirements(req);
 
 		if (req.session.gatekeeper) {
 			delete req.session.gatekeeper.serializedUser;
@@ -54,6 +58,12 @@ class SessionManager<SerializedUser = unknown> {
 				resolve(undefined);
 			});
 		});
+	}
+
+	private ensureRequirements(req: Request) {
+		if (req.session === undefined || req.session === undefined) {
+			throw new Error('Login requires session support. Did you initialize your session middleware?');
+		}
 	}
 }
 

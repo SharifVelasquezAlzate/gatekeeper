@@ -1,7 +1,9 @@
 import axios from 'axios';
-import { Request, Response, NextFunction } from 'express';
 
 import Provider, { ErrorHandler } from './Provider';
+
+import type { Request, Response, NextFunction } from 'express';
+import type { SessionData } from 'express-session';
 
 interface Config {
 	clientId: string;
@@ -25,7 +27,7 @@ export class CodeMissing extends Error {
 	}
 }
 
-type Handler = (profile: GoogleProfile) => NonNullable<Express.User | Promise<Express.User>>;
+type Handler = (profile: GoogleProfile) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
 class OAuth2Provider extends Provider<Handler> {
 	private clientId: string;

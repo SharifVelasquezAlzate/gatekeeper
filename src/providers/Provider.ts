@@ -1,9 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
+import type { SessionData } from 'express-session';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Handler<Params extends unknown[] = any[]> = (
 	...args: Params
-) => NonNullable<Express.User | Promise<Express.User>>;
+) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
 //? TODO: Should the return type of an ErrorHandler by void or could it be another error (one passed on to Express)?
 /*
@@ -18,7 +19,8 @@ export type ErrorHandler = (
 
 export abstract class Provider<CustomHandler extends Handler = Handler> {
 	/**
-	 * Middleware that processes the request and returns a `Promise<Express.User> | Express.User` or an `Error` object
+	 * Middleware that processes the request and returns a `Promise<SessionData['user']> | SessionData['user']`
+	 * or an `Error` object
 	 */
 	protected handler: CustomHandler;
 	/**
@@ -32,20 +34,20 @@ export abstract class Provider<CustomHandler extends Handler = Handler> {
 	}
 
 	/**
-	 * Returns a user to be serialized and included in the `req` object as `req.user`
+	 * Returns a user to be serialized and included in the `req` object (by default `req.session.user`)
 	 * (or returns undefined if the user should not be serialized nor set)
 	 *
 	 * @param {Request} req
 	 * @param {Response} res
 	 * @param {NextFunction} next
-	 * @returns {Express.User | Promise<Express.User> | undefined} the user to be saved
+	 * @returns {SessionData['user'] | Promise<SessionData['user']> | undefined} the user to be saved
 	 * and serialized, or undefined to indicate user should not be saved nor serialized
 	 */
 	public abstract process(
 		req: Request,
 		res: Response,
 		next: NextFunction
-	): Express.User | Promise<Express.User> | undefined;
+	): SessionData['user'] | Promise<SessionData['user']> | undefined;
 }
 
 export default Provider;
