@@ -1,4 +1,4 @@
-import Provider, { ErrorHandler as BaseErrorHandler } from './Provider';
+import Provider, { ErrorHandler } from './Provider';
 
 import type { Request, Response, NextFunction } from 'express';
 
@@ -13,7 +13,6 @@ export class IncorrectCredentials extends Error {
 		this.name = this.constructor.name;
 	}
 }
-type ErrorHandler = BaseErrorHandler<IncorrectCredentials>;
 
 interface Options {
 	failureRedirect: string
@@ -22,14 +21,15 @@ interface Options {
 function createErrorHandlerFromOptions(options: Options): ErrorHandler | null {
 	if (Object.keys(options).length <= 0) return null;
 
-	return (req, res) => {
+	return (error, req, res, next) => {
 		if (options.failureRedirect) {
 			res.redirect(301, options.failureRedirect);
 		}
+		next(error);
 	};
 }
 
-class LocalProvider extends Provider<Handler, ErrorHandler> {
+class LocalProvider extends Provider<Handler> {
 	constructor(handler: Handler, errorHandlerOrOptions?: ErrorHandler | Options) {
 		let errorHandler;
 		let options;
@@ -58,13 +58,7 @@ class LocalProvider extends Provider<Handler, ErrorHandler> {
 				return undefined;
 			}
 
-			if (error instanceof IncorrectCredentials) {
-				this.errorHandler(req, res, error);
-				return undefined;
-			}
-
-			// If not a LocalProvider custom error, pass it on to Express to handle
-			next(error);
+			this.errorHandler(error, req, res, next);
 			return undefined;
 		}
 	}
