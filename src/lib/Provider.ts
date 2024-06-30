@@ -6,7 +6,6 @@ export type Handler<Params extends unknown[] = any[]> = (
 	...args: Params
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
-//? TODO: Should the return type of an ErrorHandler by void or could it be another error (one passed on to Express)?
 /*
  * Error handler that can handle the errors included in the `PotentialErrors` type.
  */

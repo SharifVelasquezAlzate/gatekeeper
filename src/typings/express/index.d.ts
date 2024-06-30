@@ -1,4 +1,4 @@
-import { Request as GatekeeperRequest } from "../../request"; 
+import { Request as GatekeeperRequest } from "../../lib/request"; 
 
 declare global {
 	namespace Express {

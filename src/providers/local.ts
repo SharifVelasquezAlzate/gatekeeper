@@ -1,4 +1,4 @@
-import Provider, { ErrorHandler } from './Provider';
+import Provider, { ErrorHandler } from '../lib/Provider';
 
 import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';

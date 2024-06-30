@@ -1,5 +1,5 @@
+import Provider from './Provider';
 import SessionManager from './SessionManager';
-import Provider from './providers/Provider';
 import mutatedReq from './request';
 
 import type { Request, Response, NextFunction } from 'express';
