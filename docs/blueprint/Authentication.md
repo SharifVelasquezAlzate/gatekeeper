@@ -44,7 +44,9 @@ router.post(
 
 ### Protecting routes
 
-To protect a route you can call `gatekeeper.protect` and pass to it a failure handler that specifies what to do in case the user is not authenticated (if you don't provide a failure handler, gatekeeper will just return a 401 status code response). Let's see it in action:
+#### `gatekeeper.protect()`
+
+You can also call `gatekeeper.protect` and pass to it a failure handler that specifies what to do in case the user is not authenticated (if you don't provide a failure handler, gatekeeper will just return a 401 status code response). Let's see it in action:
 
 #### Example #1
 
@@ -65,7 +67,7 @@ router.get(
 ```js
 router.get('/protected', gatekeeper.protect((req, res, next) => {
 	return res.redirect('/auth/google');
-}), (req, res) => res.send('The user is authenticated!'));
+}))
 ```
 
-That's it! Now your application has a secure, nice and simple authentication system with Gatekeeper!
+That's it! Now your application has an unobtrusive, easy-to-use authentication system with Gatekeeper.

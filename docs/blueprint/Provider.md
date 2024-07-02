@@ -1,6 +1,6 @@
 ## What is a Provider?
 
-Providers are an essential part of Gatekeeper. They abstract the complexities involved in managing authentication (such as handling tokens, callbacks, etc.) and offer a clean, easy-to-use way to authenticate users.
+Providers are an essential part of Gatekeeper. They abstract the complexities involved in managing authentication (such as handling tokens, callbacks, etc.) by encapsulating these functionalities, which allows them to offer a clean easy-to-use way to authenticate users.
 
 Providers accept three parameters:
 
@@ -36,7 +36,7 @@ gatekeeper.registerProvider(new GithubProvider({
 
 ### Handler
 
-A provider processes a user's request to obtain data that is then passed to **the handler**, which is responsible for utilizing this data to generate and return a user object. This user object is then stored in the session (in `req.session.user`).
+The provider processes a user's request to obtain data that is then passed to **the handler**, which is responsible for utilizing this data to generate and return a user object. This user object is then stored in the session.
 
 #### Example #1
 
@@ -45,7 +45,7 @@ import gatekeeper from '@sharifvelasquez/gatekeeper';
 import GoogleProvider from '@sharifvelasquez/gatekeeper/providers/google';
 
 gatekeeper.registerProvider(new GoogleProvider(options, (access_token, profile) => {
-	// For example, you can use the Google user's id (that is inside the `profile` variable provided by the Google Provider) to get the user from your database
+	// For example, you can use the Google user id to get the user from your database
 	const user = User.findOne({ externalServiceId: profile.id });
 
 	return user;
@@ -61,7 +61,7 @@ import GithubProvider from '@sharifvelasquez/gatekeeper/providers/github';
 gatekeeper.registerProvider(new GithubProvider(options, (access_token, profile) => {
 	const user = User.findOne({ id: profile.id });
 
-	// The handler must ALWAYS return something that will be saved as the user inside req.session.user
+	// The handler must always return something that will be saved as the user inside req.session.user
 	return { id: user.id, createdByProvider: 'github', someOtherProperty: 123 };
 }));
 ```
@@ -111,11 +111,9 @@ gatekeeper.registerProvider(new LocalProvider(options, (username, password) => {
 }, errorHandler));
 ```
 
-This way unexpected/incorrect behaviour becomes clearer and predictable.
-
 ### Error Handler (optional)
 
-The error handler allows you to manage and handle the errors that might be thrown during the execution of the handler.
+The error handler allows you to manage and handle the errors that were thrown during the execution of the handler.
 
 #### Example #1
 
@@ -146,7 +144,7 @@ gatekeeper.registerProvider(new LocalProvider(options, (username, password) => {
 		res.send('There was an error while trying to log in').status(500);
 	}
 
-	// Don't forget to call the `next` function in case this is an error we cannot/don't want to handle, as it will pass the error on to Express. Doing this is heavily recommended
+	// Don't forget to call next in case this is an error we cannot/don't want to handle, pass it on to Express. Doing this is heavily recommended
 	next(error);
 }));
 ```

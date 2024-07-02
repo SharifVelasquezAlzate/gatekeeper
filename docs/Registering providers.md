@@ -1,10 +1,11 @@
-## Registering providers
+## Registering a Provider
 
-in our file `lib/gatekeeper` you just have to use the `registerProvider` method, and pass to it a Provider (alongside with a name for this provider if you want to identify the provider by a different name other than the default one).
+Now that you know what a provider is and how to create them, it is time to use them!
 
-### Example
+To register a provider just call `gatekeeper.registerProvider` and pass to it the Provider you want to register (you can also specify a custom name for your provider if you want. If not, Gatekeeper will use the provider's default name).
 
-lib/gatekeeper.js
+#### Example #1
+
 ```js
 import gatekeeper from '@sharifvelasquez/gatekeeper'
 import GoogleProvider from '@sharifvelasquez/gatekeeper/providers/google';
@@ -17,29 +18,31 @@ gatekeeper.registerProvider('myProviderName', new GoogleProvider({
 }));
 ```
 
-This allows you to register multiple providers depending on your needs, for example, you can register a provider called `'normal'` that saves the user normally, and another one called `'smiley face'` that adds a smilley face to the user's username, just like this:
+We recommend you do this at the beginning of your application. You can easily do this by, for example, creating a file called `gatekeeperConfig.js`, registering your providers there, and then importing it inside your main application file. Here's an example:
 
+gatekeeperConfig.js
 ```js
 import gatekeeper from '@sharifvelasquez/gatekeeper'
-import GithubProvider from '@sharifvelasquez/gatekeeper/providers/github';
+import GoogleProvider from '@sharifvelasquez/gatekeeper/providers/google'
 
-gatekeeper.registerProvider('normal', new GithubProvider({
-    clientId: 'Wait... Has it always ben this easy to authenticate users?',
-    clientSecret: 'It always has been...'
-}, function handler(access_token, profile) {
-    return profile;
-}));
-
-gatekeeper.registerProvider('smiley face', new GithubProvider({
-    clientId: 'I think no one reads this at this point',
-    clientSecret: 'Maybe they do, you never know...'
-}, function handler(access_token, profile) {
-    const smileyProfile = profile.username.name + ' :)';
-    return smileyProfile;
+gatekeeper.registerProvider(new GoogleProvider({
+	clientId: '<YOUR CLIENT ID>',
+	clientSecret: '<YOUR CLIENT SECRET>'
+}, function handler(access_token, profile) => {
+	return profile;
 }));
 ```
 
-Please notice how we registered two providers, both of which used Github, which means there is no limit or restriction on the amount of providers you can register, nor on the things you can use them for!
+app.js
+```js
+import gatekeeper from '@sharifvelasquez/gatekeeper'
+import express from 'express'
+import session from 'express-session'
 
-Now that we know how to register providers, it's time to actually use them. Visit *Authentication*
+// We import the file that contains our provider registrations
+import './config/gatekeeperConfig'
+```
 
+(You can go for a completely different approach, just make sure you register your providers before using them inside your routes!)
+
+Once you have registered your providers, go to *Authentication* to see how to use them in your app.
