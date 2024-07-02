@@ -53,6 +53,6 @@ app.use(gatekeeper.initialize({
 }));
 ```
 
-And with this gatekeeper will already be initialized!
+And with this gatekeeper is already initialized!
 
 

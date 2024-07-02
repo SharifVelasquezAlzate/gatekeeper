@@ -10,7 +10,8 @@ To authenticate users whenever they post to this route, you just have to pass `g
 
 ```js
 router.post(
-	'/auth/google',
+	// The /* at the end of the route is important, as it will allow gatekeeper to handle the callback of OAuth2 providers
+	'/auth/google/*',
 	gatekeeper.authenticateWithProvider('google'),
 
 	// The route handler will be called once the authentication has been succesful
@@ -42,19 +43,6 @@ router.post(
 ```
 
 ### Protecting routes
-
-#### `req.isAuthenticated()`
-
-If you just want to check if a user is authenticated or not, you can use `req.isAuthenticated()`.
-
-#### Example #1
-
-```js
-router.get('/areYouLoggedIn', (req, res, next) => {
-	if (req.isAuthenticated()) return res.send('Yeah!');
-	else return res.send('Nope :('); 
-});
-```
 
 #### `gatekeeper.protect()`
 

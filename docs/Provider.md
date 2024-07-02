@@ -6,7 +6,7 @@ Providers accept three parameters:
 
 ### Options
 
-Allow you to pass additional data for a Provider to work, or to customize it to your needs.
+Allow you to pass additional data for a Provider to work, or to customize it to your needs. Each provider has its own options, so be sure to check out our *Providers* page and look for the providers you want to implement.
 
 #### Example #1
 
@@ -61,7 +61,7 @@ import GithubProvider from '@sharifvelasquez/gatekeeper/providers/github';
 gatekeeper.registerProvider(new GithubProvider(options, (access_token, profile) => {
 	const user = User.findOne({ id: profile.id });
 
-	// It always returns an object that will be saved as the user inside the req.session object
+	// The handler must always return something that will be saved as the user inside req.session.user
 	return { id: user.id, createdByProvider: 'github', someOtherProperty: 123 };
 }));
 ```
@@ -144,7 +144,7 @@ gatekeeper.registerProvider(new LocalProvider(options, (username, password) => {
 		res.send('There was an error while trying to log in').status(500);
 	}
 
-	// In case this is an error we cannot/don't want to handle, pass it on to Express. Doing this is heavily recommended
+	// Don't forget to call next in case this is an error we cannot/don't want to handle, pass it on to Express. Doing this is heavily recommended
 	next(error);
 }));
 ```
@@ -183,6 +183,6 @@ gatekeeper.registerProvider(new LocalProvider(options, (username, password) => {
 }));
 ```
 
-## Example
+## More examples
 
-It's now time to use all the knowledge we have acquired and register a provider. We recommend you visit the Local Provider example or the Google Provider example, or you can visit the *Providers* page to see how to implement your favorite providers.
+We recommend you visit the Local Provider example or the Google Provider example, or you can visit the *Providers* page to see how to implement your favorite providers.

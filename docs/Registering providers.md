@@ -39,7 +39,7 @@ gatekeeper.registerProvider('smiley face', new GithubProvider({
 }));
 ```
 
-Please notice how we used the Github provider twice, which means there is no limit or restriction on the amount of providers you can register, nor on the things you can use them for!
+Please notice how we registered two providers, both of which used Github, which means there is no limit or restriction on the amount of providers you can register, nor on the things you can use them for!
 
 Now that we know how to register providers, it's time to actually use them. Visit *Authentication*
 
