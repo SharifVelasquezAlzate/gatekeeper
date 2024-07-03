@@ -1,6 +1,6 @@
 ## What is a Provider?
 
-Providers are an essential part of Gatekeeper. They abstract the complexities involved in managing authentication (such as handling tokens, callbacks, etc.) and offer a clean, easy-to-use way to authenticate users.
+Providers are an essential part of Gatekeeper. They abstract the complexities involved in managing authentication (such as handling tokens, callbacks, etc.) and offer a clean, easy-to-use way to authenticate users. 
 
 Providers accept three parameters:
 
@@ -70,7 +70,7 @@ gatekeeper.registerProvider(new GithubProvider(options, (access_token, profile) 
 
 Maybe the user that is trying to log in doesn't exist, or perhaps its credentials are invalid. Whatever the reason is, you may not always be able to retrieve a user. In these cases, you can throw an error that can later be handled by the error handler (we'll look at that in a moment). Most providers have predefined errors you can use, but you can also create your own.
 
-#### Example #1
+#### Example #1 -- Predefined errors
 
 ```js
 import gatekeeper from '@sharifvelasquez/gatekeeper';
@@ -88,7 +88,7 @@ gatekeeper.registerProvider(new LocalProvider(options, (username, password) => {
 
 Or, as mentioned before, you can also define your own custom errors:
 
-#### Example #2
+#### Example #2 -- Custom errors
 
 ```js
 import gatekeeper from 'gatekeeper';

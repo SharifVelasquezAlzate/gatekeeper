@@ -21,9 +21,11 @@ router.post(
 );
 ```
 
-And that's it! Your app now has authentication!
+And that's it! Your app now has a login system!
 
-Also, once the user has been authenticated, you can access it through `req.session.user`.
+### How to access the user once it has logged in?
+
+Once the user has been authenticated, you can access it through `req.session.user`. 
 
 #### Example
 
