@@ -25,6 +25,8 @@ export class CodeMissing extends Error {
 }
 
 class GoogleProvider extends OAuth2Provider<GoogleProfile> {
+	public defaultName = 'google';
+
 	constructor(config: Config, handler: Handler<GoogleProfile>, errorHandler?: ErrorHandler) {
 		super({
 			clientId: config.clientId,
