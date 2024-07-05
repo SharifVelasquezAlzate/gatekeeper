@@ -58,12 +58,4 @@ class LocalProvider extends Provider<Handler> {
 	}
 }
 
-/* ================== ERRORS ================== */
-export class IncorrectCredentials extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = this.constructor.name;
-	}
-}
-
 export default LocalProvider;
