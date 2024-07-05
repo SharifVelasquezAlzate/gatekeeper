@@ -83,6 +83,27 @@ class Gatekeeper<SerializedUser> {
 		}.bind(this);
 	}
 
+	public protect(failureHandler?: (req: Request, res: Response, next: NextFunction) => void) {
+		return function protector(req: Request, res: Response, next: NextFunction) {
+			if (req.isAuthenticated()) {
+				next();
+				return;
+			}
+
+			if (failureHandler !== undefined && failureHandler !== null) {
+				if (typeof failureHandler !== 'function') {
+					throw new Error('failureHandler passed to gatekeeper.protect is not a function');
+				}
+
+				failureHandler(req, res, next);
+				return;
+			}
+
+			res.sendStatus(401);
+			return;
+		};
+	}
+
 	private async populateRequestWithUserFromSerializedUser(req: Request) {
 		this.ensureInitialized();
 
@@ -95,8 +116,6 @@ class Gatekeeper<SerializedUser> {
 		const user = this.userDeserializer!(storedSerializedUser);
 		await this.sessionManager.setUser(req, user);
 	}
-
-	//
 	private ensureInitialized(this: Gatekeeper<SerializedUser>) {
 		if (typeof this.userSerializer !== 'function') {
 			throw notInitializedError;
