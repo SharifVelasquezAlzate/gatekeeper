@@ -8,13 +8,6 @@ type Handler = (
 	password: unknown
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
-export class IncorrectCredentials extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = this.constructor.name;
-	}
-}
-
 interface Options {
 	failureRedirect: string
 }
