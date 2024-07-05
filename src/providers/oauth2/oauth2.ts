@@ -24,6 +24,8 @@ export type Handler<Profile> = (
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
 class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
+	public defaultName = 'oauth2';
+
 	private clientId: string;
 	private clientSecret: string;
 

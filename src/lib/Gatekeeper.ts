@@ -9,8 +9,8 @@ export type UserSerializer<SerializedUser> = (user: SessionData['user']) => Seri
 export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => SessionData['user'];
 
 interface InitializeConfig<SerializedUser> {
-	userSerializer: UserSerializer<SerializedUser>,
-	userDeserializer: UserDeserializer<SerializedUser>
+	userSerializer: UserSerializer<SerializedUser>;
+	userDeserializer: UserDeserializer<SerializedUser>;
 }
 
 const notInitializedError = new Error(
@@ -45,8 +45,17 @@ class Gatekeeper<SerializedUser> {
 		}.bind(this);
 	}
 
-	public registerProvider(name: string, provider: Provider) {
-		this.providers[name] = provider;
+	public registerProvider(name: string, provider: Provider): void;
+	public registerProvider(provider: Provider): void;
+	public registerProvider(name: string | Provider, provider?: Provider) {
+		if (typeof name !== 'string') {
+			provider = name;
+			name = provider.providerDefaultName;
+			this.providers[name] = provider;
+			return;
+		}
+		
+		this.providers[name] = provider!;
 	}
 
 	public authenticateWithProviderName(providerName: string) {

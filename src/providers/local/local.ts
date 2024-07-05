@@ -24,6 +24,8 @@ function createErrorHandlerFromOptions(options: Options): ErrorHandler | null {
 }
 
 class LocalProvider extends Provider<Handler> {
+	public defaultName = 'local';
+
 	constructor(handler: Handler, errorHandlerOrOptions?: ErrorHandler | Options) {
 		let errorHandler;
 		let options;

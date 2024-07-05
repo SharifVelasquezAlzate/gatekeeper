@@ -9,14 +9,10 @@ export type Handler<Params extends unknown[] = any[]> = (
 /*
  * Error handler that can handle the errors included in the `PotentialErrors` type.
  */
-export type ErrorHandler = (
-	error: unknown,
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => void;
+export type ErrorHandler = (error: unknown, req: Request, res: Response, next: NextFunction) => void;
 
 export abstract class Provider<CustomHandler extends Handler = Handler> {
+	public providerDefaultName = 'provider';
 	/**
 	 * Middleware that processes the request and returns a `Promise<SessionData['user']> | SessionData['user']`
 	 */
