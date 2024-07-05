@@ -50,7 +50,7 @@ class Gatekeeper<SerializedUser> {
 	public registerProvider(name: string | Provider, provider?: Provider) {
 		if (typeof name !== 'string') {
 			provider = name;
-			name = provider.providerDefaultName;
+			name = provider.defaultName;
 			this.providers[name] = provider;
 			return;
 		}
