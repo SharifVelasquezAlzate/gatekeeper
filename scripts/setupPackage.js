@@ -30,6 +30,10 @@ function copyPackageJSONToDist() {
 	fs.copyFileSync(path.join(__dirname, '../.npmignore'), path.join(__dirname, '../dist/.npmignore'));
 }
 
+function copyREADMEToDist() {
+	fs.copyFileSync(path.join(__dirname, '../README.md'), path.join(__dirname, '../dist/README.md'));
+}
+
 const indexDeclarationFile = path.join(__dirname, '../dist/index.d.ts');
 writeDeclarationFilesToDist(path.join(__dirname, '../src'), indexDeclarationFile);
 copyPackageJSONToDist();
