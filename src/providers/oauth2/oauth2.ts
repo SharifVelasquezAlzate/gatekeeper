@@ -24,102 +24,103 @@ export type Handler<Profile> = (
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
 class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
-	public defaultName = 'oauth2';
+    public defaultName = 'oauth2';
 
-	private clientId: string;
-	private clientSecret: string;
+    private clientId: string;
+    private clientSecret: string;
+    private callbackURL: string;
 
-	private authorizationURL: string;
-	private tokenURL: string;
-	private callbackURL: string;
-	private profileURL: string;
-	private scope?: string[];
+    private authorizationURL: string;
+    private tokenURL: string;
+    private profileURL: string;
 
-	private additionalAuthURLParameters?: Record<string, string>;
+    private scope?: string[];
 
-	constructor(config: Config, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
-		super(handler, errorHandler);
+    private additionalAuthURLParameters?: Record<string, string>;
 
-		this.clientId = config.clientId;
-		this.clientSecret = config.clientSecret;
+    constructor(config: Config, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
+        super(handler, errorHandler);
 
-		this.authorizationURL = config.authorizationURL;
-		this.tokenURL = config.tokenURL;
-		this.callbackURL = config.callbackURL;
-		this.profileURL = config.profileURL;
-		this.scope = config.scope;
+        this.clientId = config.clientId;
+        this.clientSecret = config.clientSecret;
 
-		this.additionalAuthURLParameters = config.additionalAuthorizationURLParameters;
-	}
+        this.authorizationURL = config.authorizationURL;
+        this.tokenURL = config.tokenURL;
+        this.callbackURL = config.callbackURL;
+        this.profileURL = config.profileURL;
+        this.scope = config.scope;
 
-	public async process(req: Request, res: Response, next: NextFunction) {
-		if (req.query?.code) {
-			return await this.processCallback(req, res, next);
-		} else {
-			this.processFirstContact(req, res);
-			return undefined;
-		}
-	}
+        this.additionalAuthURLParameters = config.additionalAuthorizationURLParameters;
+    }
 
-	public processFirstContact(req: Request, res: Response) {
-		const authorizationURLWithParameters = new URL(this.authorizationURL);
-		authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
-		authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
-		authorizationURLWithParameters.searchParams.append('response_type', 'code');
-		if (this.scope !== undefined && this.scope !== null) {
-			authorizationURLWithParameters.searchParams.append('scope', this.scope?.join(' '));
-		}
-		if (
-			this.additionalAuthURLParameters !== undefined &&
+    public async process(req: Request, res: Response, next: NextFunction) {
+        if (req.query?.code) {
+            return await this.processCallback(req, res, next);
+        } else {
+            this.processFirstContact(req, res);
+            return undefined;
+        }
+    }
+
+    public processFirstContact(req: Request, res: Response) {
+        const authorizationURLWithParameters = new URL(this.authorizationURL);
+        authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
+        authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
+        authorizationURLWithParameters.searchParams.append('response_type', 'code');
+        if (this.scope !== undefined && this.scope !== null) {
+            authorizationURLWithParameters.searchParams.append('scope', this.scope?.join(' '));
+        }
+        if (
+            this.additionalAuthURLParameters !== undefined &&
 			this.additionalAuthURLParameters !== null &&
 			typeof this.additionalAuthURLParameters === 'object'
-		) {
-			for (const param in this.additionalAuthURLParameters) {
-				authorizationURLWithParameters.searchParams.append(param, this.additionalAuthURLParameters[param]);
-			}
-		}
+        ) {
+            for (const param in this.additionalAuthURLParameters) {
+                authorizationURLWithParameters.searchParams.append(param, this.additionalAuthURLParameters[param]);
+            }
+        }
 
-		res.redirect(authorizationURLWithParameters.toString());
-	}
+        res.redirect(authorizationURLWithParameters.toString());
+    }
 
-	public async processCallback(req: Request, res: Response, next: NextFunction) {
-		const { code } = req.query;
-		if (typeof code !== 'string') {
-			throw new Error('code for OAuth2 is undefined');
-		}
+    public async processCallback(req: Request, res: Response, next: NextFunction) {
+        const { code } = req.query;
+        if (typeof code !== 'string') {
+            throw new Error('code for OAuth2 is undefined');
+        }
 
-		// Obtain access token
-		const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
-			code: code,
-			client_id: this.clientId,
-			client_secret: this.clientSecret,
-			redirect_uri: this.callbackURL,
-			grant_type: 'authorization_code'
-		}, {
-			headers: { Accept: 'application/json' }
-		});
-		const { access_token } = data;
+        // Obtain access token
+        const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
+            code: code,
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
+            redirect_uri: this.callbackURL,
+            grant_type: 'authorization_code'
+        }, {
+            headers: { Accept: 'application/json' }
+        });
+        const { access_token } = data;
 
-		// Use access token to fetch user profile
-		const { data: profile } = await axios.get<Profile>(this.profileURL, {
-			headers: {
-				Authorization: `Bearer ${access_token}`,
-				Accept: 'application/json'
-			}
-		});
+        // Use access token to fetch user profile
+        const { data: profile } = await axios.get<Profile>(this.profileURL, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                Accept: 'application/json'
+            }
+        });
 
-		try {
-			const user = await this.handler(access_token, profile);
-			return user;
-		} catch (error) {
-			if (typeof this.errorHandler !== 'function') {
-				next(error);
-				return undefined;
-			}
-			this.errorHandler(error, req, res, next);
-			return undefined;
-		}
-	}
+        try {
+            const user = await this.handler(access_token, profile);
+            return user;
+        } catch (error) {
+            if (typeof this.errorHandler !== 'function') {
+                next(error);
+                return undefined;
+            }
+            this.errorHandler(error, req, res, next);
+            return undefined;
+        }
+    }
 }
 
 export default OAuth2Provider;
