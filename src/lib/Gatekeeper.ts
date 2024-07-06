@@ -47,14 +47,6 @@ class Gatekeeper<SerializedUser> {
         this.ensureInitialized();
 
         return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
-            const storedSerializedUser = req.session.gatekeeper?.serializedUser;
-
-            if (storedSerializedUser !== null && storedSerializedUser !== undefined) {
-                await this.populateRequestWithUserFromSerializedUser(req);
-                next();
-                return;
-            }
-
             const user = await provider.process(req, res, next);
             // We don't call next, as undefined/null means the Provider already did the error handling
             if (user === undefined || user === null) {
