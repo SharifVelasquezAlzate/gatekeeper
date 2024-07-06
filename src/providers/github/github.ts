@@ -4,7 +4,7 @@ import OAuth2Provider, { Handler } from '@/providers/oauth2';
 interface Config {
 	clientId: string;
 	clientSecret: string;
-	callbackURL: string;
+	callbackURL?: string;
 	scope?: string[];
 
 	githubAuthURL?: string;
