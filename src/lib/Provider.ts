@@ -9,20 +9,20 @@ export type Handler<Params extends unknown[] = any[]> = (
 export type ErrorHandler = (error: unknown, req: Request, res: Response, next: NextFunction) => void;
 
 export abstract class Provider<CustomHandler extends Handler = Handler> {
-	public defaultName = 'provider';
-	/**
+    public defaultName = 'provider';
+    /**
 	 * Middleware that processes the request and returns a `Promise<SessionData['user']> | SessionData['user']`
 	 */
-	protected handler: CustomHandler;
-	/**
+    protected handler: CustomHandler;
+    /**
 	 * Handles custom errors thrown by the handler
 	 */
-	protected errorHandler?: ErrorHandler;
+    protected errorHandler?: ErrorHandler;
 
-	constructor(handler: CustomHandler, errorHandler?: ErrorHandler | null) {
-		this.handler = handler;
-		if (errorHandler !== null) this.errorHandler = errorHandler;
-	}
+    constructor(handler: CustomHandler, errorHandler?: ErrorHandler | null) {
+        this.handler = handler;
+        if (errorHandler !== null) this.errorHandler = errorHandler;
+    }
 
 	/**
 	 * Returns a user to be serialized and included in the `req` object (by default `req.session.user`)
