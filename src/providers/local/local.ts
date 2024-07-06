@@ -9,22 +9,19 @@ type Handler = (
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
 interface Options {
-	failureRedirect: string
+    usernameField: string;
+    passwordField: string;
 }
 
-function createErrorHandlerFromOptions(options: Options): ErrorHandler | null {
-    if (Object.keys(options).length <= 0) return null;
-
-    return (error, req, res, next) => {
-        if (options.failureRedirect) {
-            res.redirect(301, options.failureRedirect);
-        }
-        next(error);
-    };
+function defaultErrorHandler(error: unknown, req: Request, res: Response) {
+    return res.send(error).sendStatus(401);
 }
 
 class LocalProvider extends Provider<Handler> {
     public defaultName = 'local';
+
+    public usernameField?: string;
+    public passwordField?: string;
 
     constructor(handler: Handler, errorHandlerOrOptions?: ErrorHandler | Options) {
         let errorHandler;
@@ -34,14 +31,18 @@ class LocalProvider extends Provider<Handler> {
             errorHandler = errorHandlerOrOptions;
         } else if (typeof errorHandlerOrOptions === 'object') {
             options = errorHandlerOrOptions;
-            errorHandler = createErrorHandlerFromOptions(options);
+            errorHandler = defaultErrorHandler;
         }
 
         super(handler, errorHandler);
+
+        this.usernameField = options?.usernameField;
+        this.passwordField = options?.passwordField;
     }
 
     public async process(req: Request, res: Response, next: NextFunction) {
-        const { username, password } = req.body as Record<string, unknown>;
+        const username = (req.body as Record<string, unknown>)[this.usernameField ?? 'username'];
+        const password = (req.body as Record<string, unknown>)[this.passwordField ?? 'password'];
 
         try {
             const handlerResult = await this.handler(username, password);
