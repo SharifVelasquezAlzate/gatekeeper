@@ -20,8 +20,8 @@ function defaultErrorHandler(error: unknown, req: Request, res: Response) {
 class LocalProvider extends Provider<Handler> {
     public defaultName = 'local';
 
-    public usernameField?: string;
-    public passwordField?: string;
+    private usernameField?: string;
+    private passwordField?: string;
 
     constructor(handler: Handler, errorHandlerOrOptions?: ErrorHandler | Options) {
         let errorHandler;
