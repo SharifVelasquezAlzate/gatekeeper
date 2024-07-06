@@ -11,7 +11,7 @@ interface Config {
 
 	authorizationURL: string;
 	tokenURL: string;
-	callbackURL?: string;
+	callbackURL: string;
 	profileURL: string;
 	scope?: string[];
 
@@ -28,7 +28,7 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
     private clientId: string;
     private clientSecret: string;
-    private callbackURL?: string;
+    private callbackURL: string;
 
     private authorizationURL: string;
     private tokenURL: string;
@@ -63,11 +63,9 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
     }
 
     public processFirstContact(req: Request, res: Response) {
-        const currentURL = `${req.protocol}://${req.get('host') ?? req.hostname}${req.originalUrl || req.url}`;
-
         const authorizationURLWithParameters = new URL(this.authorizationURL);
         authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
-        authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL ?? currentURL);
+        authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
         authorizationURLWithParameters.searchParams.append('response_type', 'code');
         if (this.scope !== undefined && this.scope !== null) {
             authorizationURLWithParameters.searchParams.append('scope', this.scope?.join(' '));
