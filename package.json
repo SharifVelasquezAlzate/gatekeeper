@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npx eslint && tsc && node scripts/setupPackage.js && tsc-alias && cd dist && npm pack --pack-destination ../",
+    "build-nolint": "tsc && node scripts/setupPackage.js && tsc-alias && cd dist && npm pack --pack-destination ../",
     "publish": "npm run build && cd dist && npm publish"
   },
   "keywords": [

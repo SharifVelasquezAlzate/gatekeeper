@@ -15,8 +15,6 @@ interface Config {
 interface GithubProfile {}
 
 class GithubProvider extends OAuth2Provider<GithubProfile> {
-    public defaultName = 'github';
-
     constructor(config: Config, handler: Handler<GithubProfile>, errorHandler?: ErrorHandler) {
         super({
             clientId: config.clientId,

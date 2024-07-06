@@ -22,8 +22,6 @@ class Gatekeeper<SerializedUser> {
     private userSerializer?: UserSerializer<SerializedUser>;
     private userDeserializer?: UserDeserializer<SerializedUser>;
 
-    private providers: Record<string, Provider> = {};
-
     constructor(sessionManager: SessionManager) {
         this.sessionManager = sessionManager;
     }
@@ -45,20 +43,7 @@ class Gatekeeper<SerializedUser> {
         }.bind(this);
     }
 
-    public registerProvider(name: string, provider: Provider): void;
-    public registerProvider(provider: Provider): void;
-    public registerProvider(name: string | Provider, provider?: Provider) {
-        if (typeof name !== 'string') {
-            provider = name;
-            name = provider.defaultName;
-            this.providers[name] = provider;
-            return;
-        }
-		
-        this.providers[name] = provider!;
-    }
-
-    public authenticateWithProvider(providerName: string) {
+    public authenticateWithProvider(provider: Provider) {
         this.ensureInitialized();
 
         return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
@@ -70,9 +55,9 @@ class Gatekeeper<SerializedUser> {
                 return;
             }
 
-            const user = await this.providers[providerName].process(req, res, next);
-            // We don't call next, as undefined means the Provider already did the error handling
-            if (user === undefined) {
+            const user = await provider.process(req, res, next);
+            // We don't call next, as undefined/null means the Provider already did the error handling
+            if (user === undefined || user === null) {
                 await this.sessionManager.setUser(req, undefined);
                 await this.sessionManager.deleteSerializedUser(req);
                 return;
