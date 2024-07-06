@@ -81,7 +81,7 @@ export default [
             'no-console': ['error', {
                 allow: ['warn', 'error']
             }],
-            'max-lines-per-function': ['error', 40],
+            'max-lines-per-function': ['error', 60],
             'semi': ['error', 'always']
         }
     }

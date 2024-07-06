@@ -85,31 +85,30 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
     public async processCallback(req: Request, res: Response, next: NextFunction) {
         const { code } = req.query;
-        if (typeof code !== 'string') {
+        if (typeof code !== 'string')
             throw new Error('code for OAuth2 is undefined');
-        }
-
-        // Obtain access token
-        const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
-            code: code,
-            client_id: this.clientId,
-            client_secret: this.clientSecret,
-            redirect_uri: this.callbackURL,
-            grant_type: 'authorization_code'
-        }, {
-            headers: { Accept: 'application/json' }
-        });
-        const { access_token } = data;
-
-        // Use access token to fetch user profile
-        const { data: profile } = await axios.get<Profile>(this.profileURL, {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-                Accept: 'application/json'
-            }
-        });
 
         try {
+            // Obtain access token
+            const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
+                code: code,
+                client_id: this.clientId,
+                client_secret: this.clientSecret,
+                redirect_uri: this.callbackURL,
+                grant_type: 'authorization_code'
+            }, {
+                headers: { Accept: 'application/json' }
+            });
+            const { access_token } = data;
+
+            // Use access token to fetch user profile
+            const { data: profile } = await axios.get<Profile>(this.profileURL, {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    Accept: 'application/json'
+                }
+            });
+
             const user = await this.handler(access_token, profile);
             return user;
         } catch (error) {
