@@ -18,8 +18,6 @@ function defaultErrorHandler(error: unknown, req: Request, res: Response) {
 }
 
 class LocalProvider extends Provider<Handler> {
-    public defaultName = 'local';
-
     private usernameField?: string;
     private passwordField?: string;
 

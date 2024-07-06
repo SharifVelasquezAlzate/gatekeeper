@@ -9,7 +9,7 @@ export default [
         languageOptions: { globals: globals.node }
     },
     {
-        ignores: ["dist/*"]
+        ignores: ["dist/*", "docs/*"]
     },
     // ESLint
     eslint.configs.recommended,
