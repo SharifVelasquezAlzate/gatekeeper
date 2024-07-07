@@ -66,8 +66,6 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
         authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
         authorizationURLWithParameters.searchParams.append('response_type', 'code');
-        authorizationURLWithParameters.searchParams.append('approval_prompt', 'force');
-        authorizationURLWithParameters.searchParams.append('access_type', 'offline');
         if (this.scope !== undefined && this.scope !== null) {
             authorizationURLWithParameters.searchParams.append('scope', this.scope?.join(' '));
         }
