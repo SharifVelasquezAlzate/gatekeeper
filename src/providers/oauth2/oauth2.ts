@@ -5,7 +5,7 @@ import Provider, { ErrorHandler } from '@/lib/Provider';
 import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';
 
-interface Config {
+export interface Options {
 	clientId: string;
 	clientSecret: string;
 
@@ -13,8 +13,12 @@ interface Config {
 	tokenURL: string;
 	callbackURL: string;
 	profileURL: string;
+
 	scope?: string[];
 
+    tokenGrantType?: string
+
+    tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
 	additionalAuthorizationURLParameters?: Record<string, string>;
 }
 
@@ -34,21 +38,26 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
     private scope?: string[];
 
+    private tokenGrantType: string;
+    private tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
     private additionalAuthURLParameters?: Record<string, string>;
 
-    constructor(config: Config, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
+    constructor(options: Options, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
         super(handler, errorHandler);
 
-        this.clientId = config.clientId;
-        this.clientSecret = config.clientSecret;
+        this.clientId = options.clientId;
+        this.clientSecret = options.clientSecret;
 
-        this.authorizationURL = config.authorizationURL;
-        this.tokenURL = config.tokenURL;
-        this.callbackURL = config.callbackURL;
-        this.profileURL = config.profileURL;
-        this.scope = config.scope;
+        this.authorizationURL = options.authorizationURL;
+        this.tokenURL = options.tokenURL;
+        this.callbackURL = options.callbackURL;
+        this.profileURL = options.profileURL;
 
-        this.additionalAuthURLParameters = config.additionalAuthorizationURLParameters;
+        this.scope = options.scope;
+
+        this.tokenGrantType = options.tokenGrantType ?? 'authorization_code';
+        this.tokenRequestContentType = options.tokenRequestContentType ?? 'application/x-www-form-urlencoded';
+        this.additionalAuthURLParameters = options.additionalAuthorizationURLParameters;
     }
 
     public async process(req: Request, res: Response, next: NextFunction) {
@@ -88,15 +97,25 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
         try {
             // Obtain access token
-            const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
+            let tokenRequestBody: Record<string, string> | URLSearchParams = {
                 code: code,
                 client_id: this.clientId,
                 client_secret: this.clientSecret,
                 redirect_uri: this.callbackURL,
-                grant_type: 'authorization_code'
-            }, {
-                headers: { Accept: 'application/json' }
+                grant_type: this.tokenGrantType
+            };
+
+            if (this.tokenRequestContentType === 'application/x-www-form-urlencoded') {
+                tokenRequestBody = new URLSearchParams(tokenRequestBody);
+            }
+
+            const { data } = await axios.post<{ access_token: string }>(this.tokenURL, tokenRequestBody, {
+                headers: {
+                    'Content-Type': this.tokenRequestContentType, 
+                    Accept: 'application/json'
+                }
             });
+
             const { access_token } = data;
 
             // Use access token to fetch user profile
