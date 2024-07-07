@@ -19,6 +19,9 @@ interface Options {
     tokenGrantType?: string
 
     tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
+    tokenGrantType?: string
+
+    tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
 	additionalAuthorizationURLParameters?: Record<string, string>;
 }
 
@@ -41,14 +44,13 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
     private tokenGrantType: string;
     private tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
+    private tokenGrantType: string;
+    private tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
     private additionalAuthURLParameters?: Record<string, string>;
 
     constructor(options: Options, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
-    constructor(options: Options, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
         super(handler, errorHandler);
 
-        this.clientId = options.clientId;
-        this.clientSecret = options.clientSecret;
         this.clientId = options.clientId;
         this.clientSecret = options.clientSecret;
 
@@ -56,8 +58,12 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         this.tokenURL = options.tokenURL;
         this.callbackURL = options.callbackURL;
         this.profileURL = options.profileURL;
+
         this.scope = options.scope;
 
+        this.tokenGrantType = options.tokenGrantType ?? 'authorization_code';
+        this.tokenRequestContentType = options.tokenRequestContentType ?? 'application/x-www-form-urlencoded';
+        this.additionalAuthURLParameters = options.additionalAuthorizationURLParameters;
         this.tokenGrantType = options.tokenGrantType ?? 'authorization_code';
         this.tokenRequestContentType = options.tokenRequestContentType ?? 'application/x-www-form-urlencoded';
         this.additionalAuthURLParameters = options.additionalAuthorizationURLParameters;
@@ -105,6 +111,18 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
                 client_id: this.clientId,
                 client_secret: this.clientSecret,
                 redirect_uri: this.callbackURL,
+                grant_type: this.tokenGrantType
+            };
+
+            if (this.tokenRequestContentType === 'application/x-www-form-urlencoded') {
+                tokenRequestBody = new URLSearchParams(tokenRequestBody);
+            }
+
+            const { data } = await axios.post<{ access_token: string }>(this.tokenURL, tokenRequestBody, {
+                headers: {
+                    'Content-Type': this.tokenRequestContentType, 
+                    Accept: 'application/json'
+                }
                 grant_type: this.tokenGrantType
             };
 
