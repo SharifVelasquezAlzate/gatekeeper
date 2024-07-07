@@ -97,7 +97,8 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
             }, {
                 headers: { Accept: 'application/json' }
             });
-            const { access_token } = data;
+
+            const { refresh_token, access_token } = data;
 
             // Use access token to fetch user profile
             const { data: profile } = await axios.get<Profile>(this.profileURL, {
@@ -107,7 +108,7 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
                 }
             });
 
-            const user = await this.handler(access_token, profile);
+            const user = await this.handler(refresh_token, access_token, profile);
             return user;
         } catch (error) {
             if (typeof this.errorHandler !== 'function') {
