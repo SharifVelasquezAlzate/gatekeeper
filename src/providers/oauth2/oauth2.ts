@@ -6,29 +6,33 @@ import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';
 
 interface Options {
-	clientId: string;
-	clientSecret: string;
+    clientId: string;
+    clientSecret: string;
 
-	authorizationURL: string;
-	tokenURL: string;
-	callbackURL: string;
-	profileURL: string;
+    authorizationURL: string;
+    tokenURL: string;
+    callbackURL: string;
+    profileURL: string;
 
-	scope?: string[];
+    scope?: string[];
 
-    tokenGrantType?: string
+    tokenGrantType?: string;
 
     tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
-	additionalAuthorizationURLParameters?: Record<string, string>;
+    additionalAuthorizationURLParameters?: Record<string, string>;
 }
 
 export type Handler<Profile> = (
     refresh_token: string | undefined,
-	access_token: string,
-	profile: Profile
+    access_token: string,
+    profile: Profile
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
 
-class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> extends Provider<
+    ProviderOptions,
+    Handler<Profile>
+> {
     private clientId: string;
     private clientSecret: string;
     private callbackURL: string;
@@ -80,8 +84,8 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         }
         if (
             this.additionalAuthURLParameters !== undefined &&
-			this.additionalAuthURLParameters !== null &&
-			typeof this.additionalAuthURLParameters === 'object'
+            this.additionalAuthURLParameters !== null &&
+            typeof this.additionalAuthURLParameters === 'object'
         ) {
             for (const param in this.additionalAuthURLParameters) {
                 authorizationURLWithParameters.searchParams.append(param, this.additionalAuthURLParameters[param]);
@@ -93,8 +97,7 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
     public async processCallback(req: Request, res: Response, next: NextFunction) {
         const { code } = req.query;
-        if (typeof code !== 'string')
-            throw new Error('code for OAuth2 is undefined');
+        if (typeof code !== 'string') throw new Error('code for OAuth2 is undefined');
 
         try {
             // Obtain access token
@@ -111,11 +114,11 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
             }
 
             const { data } = await axios.post<{
-                refresh_token?: string,
-                access_token: string
+                refresh_token?: string;
+                access_token: string;
             }>(this.tokenURL, tokenRequestBody, {
                 headers: {
-                    'Content-Type': this.tokenRequestContentType, 
+                    'Content-Type': this.tokenRequestContentType,
                     Accept: 'application/json'
                 }
             });
