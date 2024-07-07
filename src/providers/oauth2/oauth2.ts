@@ -5,7 +5,7 @@ import Provider, { ErrorHandler } from '@/lib/Provider';
 import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';
 
-interface Config {
+interface Options {
 	clientId: string;
 	clientSecret: string;
 
@@ -19,6 +19,7 @@ interface Config {
 }
 
 export type Handler<Profile> = (
+    refresh_token: string,
 	access_token: string,
 	profile: Profile
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
@@ -36,19 +37,19 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
     private additionalAuthURLParameters?: Record<string, string>;
 
-    constructor(config: Config, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
+    constructor(options: Options, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
         super(handler, errorHandler);
 
-        this.clientId = config.clientId;
-        this.clientSecret = config.clientSecret;
+        this.clientId = options.clientId;
+        this.clientSecret = options.clientSecret;
 
-        this.authorizationURL = config.authorizationURL;
-        this.tokenURL = config.tokenURL;
-        this.callbackURL = config.callbackURL;
-        this.profileURL = config.profileURL;
-        this.scope = config.scope;
+        this.authorizationURL = options.authorizationURL;
+        this.tokenURL = options.tokenURL;
+        this.callbackURL = options.callbackURL;
+        this.profileURL = options.profileURL;
+        this.scope = options.scope;
 
-        this.additionalAuthURLParameters = config.additionalAuthorizationURLParameters;
+        this.additionalAuthURLParameters = options.additionalAuthorizationURLParameters;
     }
 
     public async process(req: Request, res: Response, next: NextFunction) {
@@ -65,6 +66,8 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
         authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
         authorizationURLWithParameters.searchParams.append('response_type', 'code');
+        authorizationURLWithParameters.searchParams.append('approval_prompt', 'force');
+        authorizationURLWithParameters.searchParams.append('access_type', 'offline');
         if (this.scope !== undefined && this.scope !== null) {
             authorizationURLWithParameters.searchParams.append('scope', this.scope?.join(' '));
         }
@@ -88,7 +91,7 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
 
         try {
             // Obtain access token
-            const { data } = await axios.post<{ access_token: string }>(this.tokenURL, {
+            const { data } = await axios.post<{ refresh_token: string, access_token: string }>(this.tokenURL, {
                 code: code,
                 client_id: this.clientId,
                 client_secret: this.clientSecret,
