@@ -1,4 +1,5 @@
 import axios from 'axios';
+import crypto from 'crypto';
 
 import Provider, { ErrorHandler } from '@/lib/Provider';
 
@@ -13,13 +14,14 @@ interface Options {
     tokenURL: string;
     callbackURL: string;
     profileURL: string;
-
-    scope?: string[];
+	  scope?: string[];
 
     tokenGrantType?: string;
-
     tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
     additionalAuthorizationURLParameters?: Record<string, string>;
+
+    // Options to enable or disable features
+    useOAuthState?: boolean
 }
 
 export type Handler<Profile> = (
@@ -47,6 +49,9 @@ class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> exten
     private tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
     private additionalAuthURLParameters?: Record<string, string>;
 
+    // Options to enable or disable features
+    private useOAuthState: boolean;
+
     constructor(options: Options, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
         super(handler, errorHandler);
 
@@ -63,18 +68,20 @@ class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> exten
         this.tokenGrantType = options.tokenGrantType ?? 'authorization_code';
         this.tokenRequestContentType = options.tokenRequestContentType ?? 'application/x-www-form-urlencoded';
         this.additionalAuthURLParameters = options.additionalAuthorizationURLParameters;
+
+        this.useOAuthState = options.useOAuthState ?? true;
     }
 
     public async process(req: Request, res: Response, next: NextFunction) {
         if (req.query?.code) {
             return await this.processCallback(req, res, next);
         } else {
-            this.processFirstContact(req, res);
+            await this.processFirstContact(req, res);
             return undefined;
         }
     }
 
-    public processFirstContact(req: Request, res: Response) {
+    public async processFirstContact(req: Request, res: Response) {
         const authorizationURLWithParameters = new URL(this.authorizationURL);
         authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
         authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
@@ -92,12 +99,28 @@ class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> exten
             }
         }
 
+        if (this.useOAuthState) {
+            // The answer to life... It is always 42 :)
+            const state = crypto.randomBytes(42).toString('hex');
+
+            await req._sessionManager.saveDataInProviderSpace(req, 'oauth2', { state: state });
+            authorizationURLWithParameters.searchParams.append('state', state);
+        }
+    
         res.redirect(authorizationURLWithParameters.toString());
     }
 
     public async processCallback(req: Request, res: Response, next: NextFunction) {
-        const { code } = req.query;
-        if (typeof code !== 'string') throw new Error('code for OAuth2 is undefined');
+        const { code, state } = req.query;
+        const dataStoredInFirstContact = req._sessionManager.getDataFromProviderSpace(req, 'oauth2');
+        const stateFromSession = dataStoredInFirstContact?.state;
+
+        if (typeof code !== 'string')
+            throw new Error('code for OAuth2 is undefined');
+        if (this.useOAuthState && stateFromSession == undefined)
+            throw new Error('internal OAuth2 state is undefined');
+        if (this.useOAuthState && state != undefined && stateFromSession !== state)
+            throw new Error('state is not the same.');
 
         try {
             // Obtain access token
