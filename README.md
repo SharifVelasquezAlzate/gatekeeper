@@ -8,11 +8,12 @@ This is what your authentication routes will look like after setting up Gatekeep
 
 ```js
 import gatekeeper from '@sharifvelasquez/gatekeeper';
+import { GoogleAuth } from './myAuthenticationProviders';
 
 const router = Router();
 
 // Nice and simple!
-router.get('/auth/google', gatekeeper.authenticateWithProvider('google'));
+router.get('/auth/google', gatekeeper.authenticateWithProvider(GoogleAuth));
 ```
 
 ## Beloved features
@@ -25,7 +26,7 @@ router.get('/auth/google', gatekeeper.authenticateWithProvider('google'));
 
 - **Pre-built providers 🔒** - Don't worry about implementing the most famous authentication providers -- We got you covered 😉
 
-- **Rich documentation 📚** - Our docs have everything you need (compared to other authentication modules who have little to no documentation...) and they also were carefully built with a lot of love! 
+- **Rich documentation 📚** - Our docs have everything you need (compared to other authentication modules who have little to no documentation...) and they also were carefully built with a lot of love!
 
 ## [Documentation](https://sharifvelasquezalzate.github.io/gatekeeper/docs/gatekeeper)
 
