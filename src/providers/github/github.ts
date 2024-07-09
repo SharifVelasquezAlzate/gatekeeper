@@ -12,7 +12,7 @@ interface Options {
 	githubProfileURL?: string;
 }
 
-interface GithubProfile {}
+type GithubProfile = unknown;
 
 class GithubProvider extends OAuth2Provider<Options, GithubProfile> {
     constructor(options: Options, handler: Handler<GithubProfile>, errorHandler?: ErrorHandler) {
@@ -20,6 +20,8 @@ class GithubProvider extends OAuth2Provider<Options, GithubProfile> {
             clientId: options.clientId,
             clientSecret: options.clientSecret,
             callbackURL: options.callbackURL,
+
+            scope: options.scope ?? ['user'],
 			
             authorizationURL: options.githubAuthURL ?? 'https://github.com/login/oauth/authorize',
             tokenURL: options.githubTokenURL ?? 'https://github.com/login/oauth/access_token',
