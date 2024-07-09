@@ -17,7 +17,7 @@ function defaultErrorHandler(error: unknown, req: Request, res: Response) {
     return res.send(error).sendStatus(401);
 }
 
-class LocalProvider extends Provider<Handler> {
+class LocalProvider extends Provider<Options, Handler> {
     private usernameField?: string;
     private passwordField?: string;
 
