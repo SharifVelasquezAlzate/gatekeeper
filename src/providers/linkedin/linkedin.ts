@@ -15,7 +15,7 @@ interface Options {
 
 type LinkedinProfile = unknown;
 
-class LinkedinProvider extends OAuth2Provider<LinkedinProfile> {
+class LinkedinProvider extends OAuth2Provider<Options, LinkedinProfile> {
     constructor(options: Options, handler: Handler<LinkedinProfile>, errorHandler?: ErrorHandler) {
         super({
             clientId: options.clientId,

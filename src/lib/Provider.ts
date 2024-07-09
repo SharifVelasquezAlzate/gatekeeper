@@ -8,7 +8,12 @@ export type Handler<Params extends unknown[] = any[]> = (
 
 export type ErrorHandler = (error: unknown, req: Request, res: Response, next: NextFunction) => void;
 
-export abstract class Provider<CustomHandler extends Handler = Handler> {
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export abstract class Provider<Options extends Record<string, any>, CustomHandler extends Handler = Handler> {
+    // Needed so that the Options type doesn't appear as unknown in helper types like
+    // ProviderOptions
+    private _options!: Options;
     /**
 	 * Middleware that processes the request and returns a `Promise<SessionData['user']> | SessionData['user']`
 	 */

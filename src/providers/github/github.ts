@@ -14,7 +14,7 @@ interface Options {
 
 type GithubProfile = unknown;
 
-class GithubProvider extends OAuth2Provider<GithubProfile> {
+class GithubProvider extends OAuth2Provider<Options, GithubProfile> {
     constructor(options: Options, handler: Handler<GithubProfile>, errorHandler?: ErrorHandler) {
         super({
             clientId: options.clientId,

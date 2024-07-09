@@ -15,7 +15,7 @@ interface Options {
 
 type DiscordProfile = unknown;
 
-class DiscordProvider extends OAuth2Provider<DiscordProfile> {
+class DiscordProvider extends OAuth2Provider<Options, DiscordProfile> {
     constructor(options: Options, handler: Handler<DiscordProfile>, errorHandler?: ErrorHandler) {
         super({
             clientId: options.clientId,

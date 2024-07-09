@@ -22,7 +22,7 @@ export class CodeMissing extends Error {
     }
 }
 
-class GoogleProvider extends OAuth2Provider<GoogleProfile> {
+class GoogleProvider extends OAuth2Provider<Options, GoogleProfile> {
     constructor(options: Options, handler: Handler<GoogleProfile>, errorHandler?: ErrorHandler) {
         super({
             clientId: options.clientId,
