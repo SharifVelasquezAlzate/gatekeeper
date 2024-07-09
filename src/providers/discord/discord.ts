@@ -13,9 +13,7 @@ interface Options {
     scope?: string[];
 }
 
-interface DiscordProfile {
-    
-}
+type DiscordProfile = unknown;
 
 class DiscordProvider extends OAuth2Provider<DiscordProfile> {
     constructor(options: Options, handler: Handler<DiscordProfile>, errorHandler?: ErrorHandler) {

@@ -12,9 +12,8 @@ interface Options {
 
     scope?: string[];
 }
-interface LinkedinProfile {
-    id: string;
-}
+
+type LinkedinProfile = unknown;
 
 class LinkedinProvider extends OAuth2Provider<LinkedinProfile> {
     constructor(options: Options, handler: Handler<LinkedinProfile>, errorHandler?: ErrorHandler) {

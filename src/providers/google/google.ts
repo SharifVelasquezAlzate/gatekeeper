@@ -13,9 +13,7 @@ interface Options {
 	googleProfileURL?: string;
 }
 
-interface GoogleProfile {
-	id: string;
-}
+type GoogleProfile = unknown;
 
 export class CodeMissing extends Error {
     constructor(message: string) {
