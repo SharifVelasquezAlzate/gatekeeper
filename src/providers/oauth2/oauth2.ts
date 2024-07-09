@@ -14,13 +14,14 @@ interface Options {
 	tokenURL: string;
 	callbackURL: string;
 	profileURL: string;
-
 	scope?: string[];
 
-    tokenGrantType?: string
-
+    tokenGrantType?: string;
     tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
 	additionalAuthorizationURLParameters?: Record<string, string>;
+
+    // Options to enable or disable features
+    useOAuthState?: boolean
 }
 
 export type Handler<Profile> = (
@@ -44,6 +45,9 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
     private tokenRequestContentType?: 'application/json' | 'application/x-www-form-urlencoded';
     private additionalAuthURLParameters?: Record<string, string>;
 
+    // Options to enable or disable features
+    private useOAuthState: boolean;
+
     constructor(options: Options, handler: Handler<Profile>, errorHandler?: ErrorHandler) {
         super(handler, errorHandler);
 
@@ -60,6 +64,8 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         this.tokenGrantType = options.tokenGrantType ?? 'authorization_code';
         this.tokenRequestContentType = options.tokenRequestContentType ?? 'application/x-www-form-urlencoded';
         this.additionalAuthURLParameters = options.additionalAuthorizationURLParameters;
+
+        this.useOAuthState = options.useOAuthState ?? true;
     }
 
     public async process(req: Request, res: Response, next: NextFunction) {
@@ -89,11 +95,13 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
             }
         }
 
-        // The answer to life... It is always 42 :)
-        const state = crypto.randomBytes(42).toString('hex');
+        if (this.useOAuthState) {
+            // The answer to life... It is always 42 :)
+            const state = crypto.randomBytes(42).toString('hex');
 
-        await req._sessionManager.saveDataInProviderSpace(req, 'oauth2', { state: state });
-        authorizationURLWithParameters.searchParams.append('state', state);
+            await req._sessionManager.saveDataInProviderSpace(req, 'oauth2', { state: state });
+            authorizationURLWithParameters.searchParams.append('state', state);
+        }
     
         res.redirect(authorizationURLWithParameters.toString());
     }
@@ -106,9 +114,9 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         if (typeof code !== 'string')
             throw new Error('code for OAuth2 is undefined');
 
-        if (stateFromSession == undefined)
+        if (this.useOAuthState && stateFromSession == undefined)
             throw new Error('internal OAuth2 state is undefined');
-        if (state != undefined && stateFromSession !== state)
+        if (this.useOAuthState && state != undefined && stateFromSession !== state)
             throw new Error('state is not the same.');
 
         try {
