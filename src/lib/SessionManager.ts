@@ -56,7 +56,6 @@ class SessionManager<SerializedUser = unknown> {
 
         req.session.gatekeeper.serializedUser = userSerializer(user);
 
-        // Promisified req.session.save
         await saveSession(req);
     }
 
@@ -69,6 +68,29 @@ class SessionManager<SerializedUser = unknown> {
 
         // Promisified req.session.save
         await saveSession(req);
+    }
+
+    public async saveDataInProviderSpace(req: Request, providerId: string, data: Record<string, string>) {
+        this.ensureRequirements(req);
+
+        if (!req.session.gatekeeper) {
+            req.session.gatekeeper = {};
+        } if (!(`provider${providerId}` in req.session.gatekeeper)) {
+            req.session.gatekeeper[`provider${providerId}`] = data;
+        }
+
+        req.session.gatekeeper[`provider${providerId}`] = data;
+
+        await saveSession(req);
+    }
+
+    public getDataFromProviderSpace(req: Request, providerId: string) {
+        this.ensureRequirements(req);
+
+        if (!req.session.gatekeeper) return undefined;
+        if (!(`provider${providerId}` in req.session.gatekeeper)) return undefined;
+
+        return req.session.gatekeeper[`provider${providerId}`];
     }
 
     private ensureRequirements(req: Request) {

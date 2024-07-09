@@ -1,4 +1,5 @@
 import axios from 'axios';
+import crypto from 'crypto';
 
 import Provider, { ErrorHandler } from '@/lib/Provider';
 
@@ -65,12 +66,12 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
         if (req.query?.code) {
             return await this.processCallback(req, res, next);
         } else {
-            this.processFirstContact(req, res);
+            await this.processFirstContact(req, res);
             return undefined;
         }
     }
 
-    public processFirstContact(req: Request, res: Response) {
+    public async processFirstContact(req: Request, res: Response) {
         const authorizationURLWithParameters = new URL(this.authorizationURL);
         authorizationURLWithParameters.searchParams.append('client_id', this.clientId);
         authorizationURLWithParameters.searchParams.append('redirect_uri', this.callbackURL);
@@ -88,13 +89,27 @@ class OAuth2Provider<Profile> extends Provider<Handler<Profile>> {
             }
         }
 
+        // The answer to life... It is always 42 :)
+        const state = crypto.randomBytes(42).toString('hex');
+
+        await req._sessionManager.saveDataInProviderSpace(req, 'oauth2', { state: state });
+        authorizationURLWithParameters.searchParams.append('state', state);
+    
         res.redirect(authorizationURLWithParameters.toString());
     }
 
     public async processCallback(req: Request, res: Response, next: NextFunction) {
-        const { code } = req.query;
+        const { code, state } = req.query;
+        const dataStoredInFirstContact = req._sessionManager.getDataFromProviderSpace(req, 'oauth2');
+        const stateFromSession = dataStoredInFirstContact?.state;
+
         if (typeof code !== 'string')
             throw new Error('code for OAuth2 is undefined');
+
+        if (stateFromSession == undefined)
+            throw new Error('internal OAuth2 state is undefined');
+        if (state != undefined && stateFromSession !== state)
+            throw new Error('state is not the same.');
 
         try {
             // Obtain access token

@@ -103,8 +103,10 @@ class Gatekeeper<SerializedUser> {
     }
 }
 
-export interface GatekeeperSessionData<SerializedUser> {
+export type GatekeeperSessionData<SerializedUser> = {
 	serializedUser: SerializedUser;
+} & {
+    [key in `provider${string}`] : Record<string, string>
 }
 
 export default Gatekeeper;
