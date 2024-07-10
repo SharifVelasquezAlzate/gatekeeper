@@ -1,5 +1,5 @@
 {
-  "name": "@sharifvelasquez/gatekeeper",
+  "name": "gatekeeper-auth",
   "version": "1.0.10",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
