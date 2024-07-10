@@ -43,7 +43,7 @@ class Gatekeeper<SerializedUser> {
         }.bind(this);
     }
 
-    public authenticateWithProvider(provider: Provider) {
+    public authenticateWithProvider(provider: Provider<Record<string, unknown>>) {
         this.ensureInitialized();
 
         return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
