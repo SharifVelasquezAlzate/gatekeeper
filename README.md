@@ -7,7 +7,7 @@ A secure, flexible, and very easy-to-use authentication module for your Express 
 This is what your authentication routes will look like after setting up Gatekeeper.
 
 ```js
-import gatekeeper from '@sharifvelasquez/gatekeeper';
+import gatekeeper from 'gatekeeper-authentication';
 import { GoogleAuth } from './myAuthenticationProviders';
 
 const router = Router();
