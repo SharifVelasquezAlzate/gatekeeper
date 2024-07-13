@@ -1,6 +1,6 @@
 export class UserNotFound extends Error {
-    constructor(message = '') {
-        super(message !== '' ? message : 'User not found');
+    constructor(message?: string) {
+        super(message ?? 'User not found');
         this.name = this.constructor.name;
     }
 }
