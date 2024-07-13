@@ -37,3 +37,4 @@ function copyREADMEToDist() {
 const indexDeclarationFile = path.join(__dirname, '../dist/index.d.ts');
 writeDeclarationFilesToDist(path.join(__dirname, '../src'), indexDeclarationFile);
 copyPackageJSONToDist();
+copyREADMEToDist();

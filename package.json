@@ -1,6 +1,6 @@
 {
   "name": "gatekeeper-authentication",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -10,6 +10,7 @@
     "publish": "npm run build && cd dist && npm publish"
   },
   "keywords": [
+    "gatekeeper-authentication",
     "gatekeeper",
     "gatekeeper-auth",
     "authentication",

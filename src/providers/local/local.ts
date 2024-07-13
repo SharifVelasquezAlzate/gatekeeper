@@ -4,32 +4,38 @@ import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';
 
 type Handler = (
-	username: unknown,
-	password: unknown
+    username: unknown,
+    password: unknown
 ) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
+function isHandler(x: unknown): x is Handler {
+    return typeof x === 'function';
+}
 
 interface Options {
     usernameField: string;
     passwordField: string;
 }
 
-function defaultErrorHandler(error: unknown, req: Request, res: Response) {
-    return res.send(error).sendStatus(401);
-}
-
 class LocalProvider extends Provider<Options, Handler> {
     private usernameField?: string;
     private passwordField?: string;
 
-    constructor(handler: Handler, errorHandlerOrOptions?: ErrorHandler | Options) {
-        let errorHandler;
+    constructor(options: Options, handler: Handler, errorHandler?: ErrorHandler);
+    constructor(handler: Handler, errorHandler?: ErrorHandler);
+    constructor(
+        optionsOrHandler: Options | Handler,
+        handlerOrErrorHandler: Handler | ErrorHandler | undefined,
+        errorHandler?: ErrorHandler
+    ) {
+        let handler;
         let options;
 
-        if (typeof errorHandlerOrOptions === 'function') {
-            errorHandler = errorHandlerOrOptions;
-        } else if (typeof errorHandlerOrOptions === 'object') {
-            options = errorHandlerOrOptions;
-            errorHandler = defaultErrorHandler;
+        if (isHandler(optionsOrHandler)) {
+            handler = optionsOrHandler;
+            errorHandler = handlerOrErrorHandler as ErrorHandler | undefined;
+        } else {
+            options = optionsOrHandler;
+            handler = handlerOrErrorHandler as Handler;
         }
 
         super(handler, errorHandler);
