@@ -5,16 +5,21 @@ import mutatedReq, { type User } from './request';
 import type { Request, Response, NextFunction } from 'express';
 
 export type UserSerializer<SerializedUser> = (user: NonNullable<User>) => SerializedUser;
-export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => NonNullable<User>;
+export type UserDeserializer<SerializedUser> = (
+    serializedUser: SerializedUser
+) => NonNullable<User> | Promise<NonNullable<User>>;
 
 interface InitializeConfig<SerializedUser> {
-	userSerializer: UserSerializer<SerializedUser>;
-	userDeserializer: UserDeserializer<SerializedUser>;
+    userSerializer: UserSerializer<SerializedUser>;
+    userDeserializer: UserDeserializer<SerializedUser>;
 }
 
-const notInitializedError = new Error(
-    'Gatekeeper has not been initialized. Remember to call gatekeeper.initialize() as an express middleware'
-);
+class notInitializedError extends Error {
+    constructor() {
+        super('Gatekeeper has not been initialized. Remember to call gatekeeper.initialize() as an express middleware');
+        this.name = this.constructor.name;
+    }
+}
 
 class Gatekeeper<SerializedUser> {
     private sessionManager: SessionManager;
@@ -89,23 +94,23 @@ class Gatekeeper<SerializedUser> {
             return;
         }
 
-        const user = this.userDeserializer!(storedSerializedUser);
+        const user = await this.userDeserializer!(storedSerializedUser);
         await this.sessionManager.setUser(req, user);
     }
     private ensureInitialized(this: Gatekeeper<SerializedUser>) {
         if (typeof this.userSerializer !== 'function') {
-            throw notInitializedError;
+            throw new notInitializedError();
         }
         if (typeof this.userDeserializer !== 'function') {
-            throw notInitializedError;
+            throw new notInitializedError();
         }
     }
 }
 
 export type GatekeeperSessionData<SerializedUser> = {
-	serializedUser: SerializedUser;
+    serializedUser: SerializedUser;
 } & {
-    [key in `provider${string}`] : Record<string, string>
-}
+    [key in `provider${string}`]: Record<string, string>;
+};
 
 export default Gatekeeper;
