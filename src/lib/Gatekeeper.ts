@@ -1,12 +1,11 @@
 import Provider from './Provider';
 import SessionManager from './SessionManager';
-import mutatedReq from './request';
+import mutatedReq, { type User } from './request';
 
 import type { Request, Response, NextFunction } from 'express';
-import type { SessionData } from 'express-session';
 
-export type UserSerializer<SerializedUser> = (user: NonNullable<SessionData['user']>) => SerializedUser;
-export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => NonNullable<SessionData['user']>;
+export type UserSerializer<SerializedUser> = (user: NonNullable<User>) => SerializedUser;
+export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => NonNullable<User>;
 
 interface InitializeConfig<SerializedUser> {
 	userSerializer: UserSerializer<SerializedUser>;

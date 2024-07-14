@@ -1,12 +1,12 @@
 import Provider, { ErrorHandler } from '@/lib/Provider';
 
+import type { User } from '@/lib/request';
 import type { Request, Response, NextFunction } from 'express';
-import type { SessionData } from 'express-session';
 
 type Handler = (
     username: unknown,
     password: unknown
-) => NonNullable<SessionData['user']> | Promise<NonNullable<SessionData['user']>>;
+) => NonNullable<User> | Promise<NonNullable<User>>;
 function isHandler(x: unknown): x is Handler {
     return typeof x === 'function';
 }

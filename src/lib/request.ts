@@ -1,14 +1,12 @@
 import SessionManager from "./SessionManager";
 
+import type { User } from "../index";
 import type { Request as ExpressRequest } from "express";
-import type { SessionData } from "express-session";
 
-export interface User {
-	
-}
+export { User } from '../index';
 
 export interface Request {
-	user: SessionData['user'];
+	user: User;
 	_sessionManager: SessionManager;
 
 	logout: () => (void | Promise<void>);

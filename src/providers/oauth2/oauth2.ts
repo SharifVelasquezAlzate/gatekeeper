@@ -3,8 +3,8 @@ import crypto from 'crypto';
 
 import Provider, { ErrorHandler } from '@/lib/Provider';
 
+import type { User } from '@/lib/request';
 import type { Request, Response, NextFunction } from 'express';
-import type { SessionData } from 'express-session';
 
 interface Options {
     clientId: string;
@@ -28,7 +28,7 @@ export type Handler<Profile> = (
     refresh_token: string | undefined,
     access_token: string,
     profile: Profile
-) => NonNullable<SessionData['user']> | Promise<NonNullable<SessionData['user']>>;
+) => NonNullable<User> | Promise<NonNullable<User>>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> extends Provider<
