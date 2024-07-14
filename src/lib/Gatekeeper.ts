@@ -5,8 +5,8 @@ import mutatedReq from './request';
 import type { Request, Response, NextFunction } from 'express';
 import type { SessionData } from 'express-session';
 
-export type UserSerializer<SerializedUser> = (user: SessionData['user']) => SerializedUser;
-export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => SessionData['user'];
+export type UserSerializer<SerializedUser> = (user: NonNullable<SessionData['user']>) => SerializedUser;
+export type UserDeserializer<SerializedUser> = (serializedUser: SerializedUser) => NonNullable<SessionData['user']>;
 
 interface InitializeConfig<SerializedUser> {
 	userSerializer: UserSerializer<SerializedUser>;
