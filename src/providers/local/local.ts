@@ -6,7 +6,7 @@ import type { SessionData } from 'express-session';
 type Handler = (
     username: unknown,
     password: unknown
-) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
+) => NonNullable<SessionData['user']> | Promise<NonNullable<SessionData['user']>>;
 function isHandler(x: unknown): x is Handler {
     return typeof x === 'function';
 }

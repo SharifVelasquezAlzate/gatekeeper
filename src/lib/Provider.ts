@@ -4,7 +4,7 @@ import type { SessionData } from 'express-session';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Handler<Params extends unknown[] = any[]> = (
     ...args: Params
-) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
+) => NonNullable<SessionData['user']> | Promise<NonNullable<SessionData['user']>>;
 
 export type ErrorHandler = (error: unknown, req: Request, res: Response, next: NextFunction) => void;
 export function isErrorHandler(x: unknown): x is ErrorHandler {

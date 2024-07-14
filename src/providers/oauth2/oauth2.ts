@@ -28,7 +28,7 @@ export type Handler<Profile> = (
     refresh_token: string | undefined,
     access_token: string,
     profile: Profile
-) => NonNullable<SessionData['user'] | Promise<SessionData['user']>>;
+) => NonNullable<SessionData['user']> | Promise<NonNullable<SessionData['user']>>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> extends Provider<
