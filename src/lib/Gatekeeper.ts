@@ -47,7 +47,8 @@ class Gatekeeper<SerializedUser> {
         }.bind(this);
     }
 
-    public authenticateWithProvider(provider: Provider<Record<string, unknown>>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public authenticateWithProvider(provider: Provider<Record<string, any>>) {
         this.ensureInitialized();
 
         return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {

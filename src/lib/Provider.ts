@@ -44,7 +44,7 @@ export abstract class Provider<Options extends Record<string, any>, CustomHandle
         req: Request,
         res: Response,
         next: NextFunction
-    ): User | Promise<User> | undefined;
+    ): User | Promise<User | undefined> | undefined;
 }
 
 export default Provider;
