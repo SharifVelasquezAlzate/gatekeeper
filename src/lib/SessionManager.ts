@@ -1,6 +1,6 @@
 import type { UserSerializer } from './Gatekeeper';
+import type { User } from './request';
 import type { Request } from 'express';
-import type { SessionData } from 'express-session';
 
 async function regenerateSession(req: Request) {
     const previousSession = req.session;
@@ -32,7 +32,7 @@ async function saveSession(req: Request) {
 }
 
 class SessionManager<SerializedUser = unknown> {
-    public async setUser(req: Request, user: SessionData['user'] | undefined) {
+    public async setUser(req: Request, user: User | undefined) {
         this.ensureRequirements(req);
 
         req.session.user = user;
@@ -42,7 +42,7 @@ class SessionManager<SerializedUser = unknown> {
 
     public async serializeAndSaveUser(
         req: Request,
-        user: NonNullable<SessionData['user']>,
+        user: NonNullable<User>,
         userSerializer: UserSerializer<SerializedUser>
     ) {
         this.ensureRequirements(req);
