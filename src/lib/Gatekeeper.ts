@@ -49,9 +49,9 @@ class Gatekeeper<SerializedUser> {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public authenticateWithProvider(provider: Provider<Record<string, any>>) {
-        this.ensureInitialized();
-
         return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+            this.ensureInitialized();
+
             const user = await provider.process(req, res, next);
             // We don't call next, as undefined/null means the Provider already did the error handling
             if (user === undefined || user === null) {
