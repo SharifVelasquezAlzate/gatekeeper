@@ -20,7 +20,11 @@
   ],
   "author": "",
   "license": "MIT",
-  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SharifVelasquezAlzate/gatekeeper.git"
+  },
+  "description": "A secure, flexible, and very easy-to-use authentication module for Node.js Express applications",
   "devDependencies": {
     "@eslint/js": "^9.6.0",
     "@stylistic/eslint-plugin-js": "^2.3.0",
