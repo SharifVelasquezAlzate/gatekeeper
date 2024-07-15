@@ -34,7 +34,12 @@ class Gatekeeper<SerializedUser> {
         this.userSerializer = config.userSerializer;
         this.userDeserializer = config.userDeserializer;
 
-        return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+        const initializer = async function (
+            this: Gatekeeper<SerializedUser>,
+            req: Request,
+            res: Response,
+            next: NextFunction
+        ) {
             req._sessionManager = this.sessionManager;
 
             req.logout = req.logout || mutatedReq.logout.bind(req);
@@ -45,11 +50,22 @@ class Gatekeeper<SerializedUser> {
 
             next();
         }.bind(this);
+
+        // Do not return an async function in order to work with types required by Express middleware
+        return function(this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+            initializer(req, res, next).catch((error: unknown) => {
+                next(error);
+            });
+        }.bind(this);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public authenticateWithProvider(provider: Provider<Record<string, any>>) {
-        return async function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+    public authenticateWithProvider(provider: Provider<Record<string, unknown>>) {
+        const authenticator = async function (
+            this: Gatekeeper<SerializedUser>,
+            req: Request,
+            res: Response,
+            next: NextFunction
+        ) {
             this.ensureInitialized();
 
             const user = await provider.process(req, res, next);
@@ -62,6 +78,13 @@ class Gatekeeper<SerializedUser> {
             await this.sessionManager.serializeAndSaveUser(req, user, this.userSerializer!);
             await this.populateRequestWithUserFromSerializedUser(req);
             next();
+        }.bind(this);
+
+        // Do not return an async function in order to work with types required by Express middleware
+        return function (this: Gatekeeper<SerializedUser>, req: Request, res: Response, next: NextFunction) {
+            authenticator(req, res, next).catch((error: unknown) => {
+                next(error);
+            });
         }.bind(this);
     }
 
