@@ -47,4 +47,11 @@ export abstract class Provider<Options extends Record<string, any>, CustomHandle
     ): User | Promise<User | undefined> | undefined;
 }
 
+export class IncorrectHandlerReturn extends Error {
+    constructor(message = 'Provider handler does not return a user.') {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
+
 export default Provider;
