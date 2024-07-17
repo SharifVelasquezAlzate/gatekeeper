@@ -1,4 +1,4 @@
-import Provider, { ErrorHandler } from '@/lib/Provider';
+import Provider, { ErrorHandler, IncorrectHandlerReturn } from '@/lib/Provider';
 
 import type { User } from '@/lib/request';
 import type { Request, Response, NextFunction } from 'express';
@@ -51,6 +51,10 @@ class LocalProvider extends Provider<Options, Handler> {
         try {
             const handlerResult = await this.handler(username, password);
             const processedUser = handlerResult;
+
+            if (processedUser === undefined || processedUser === null)
+                throw new IncorrectHandlerReturn();
+
             return processedUser;
         } catch (error) {
             // In case there's no error handler defined, pass it on to Express
