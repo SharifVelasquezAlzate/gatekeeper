@@ -24,6 +24,7 @@
     "type": "git",
     "url": "https://github.com/SharifVelasquezAlzate/gatekeeper.git"
   },
+  "homepage": "https://sharifvelasquezalzate.github.io/gatekeeper",
   "description": "A secure, flexible, and very easy-to-use authentication module for Node.js Express applications",
   "devDependencies": {
     "@eslint/js": "^9.6.0",
