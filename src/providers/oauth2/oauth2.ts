@@ -1,7 +1,7 @@
 import axios from 'axios';
 import crypto from 'crypto';
 
-import Provider, { ErrorHandler } from '@/lib/Provider';
+import Provider, { ErrorHandler, IncorrectHandlerReturn } from '@/lib/Provider';
 
 import type { User } from '@/lib/request';
 import type { Request, Response, NextFunction } from 'express';
@@ -157,6 +157,8 @@ class OAuth2Provider<ProviderOptions extends Record<string, any>, Profile> exten
             });
 
             const user = await this.handler(refresh_token, access_token, profile);
+            if (user === undefined || user === null)
+                throw new IncorrectHandlerReturn();
             return user;
         } catch (error) {
             if (typeof this.errorHandler !== 'function') {
